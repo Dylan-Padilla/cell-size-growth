@@ -1,0 +1,1098 @@
+---
+title: "Evolution of growth and size in prokaryotes"
+subtitle: "Dylan Padilla<br>Spring, 2024<br><br><br><br><br>"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ['default', 'default.css']
+    seal: true
+    nature:
+      ratio: '16:9'
+      slideNumberFormat: '%current%' 
+      highlightStyle: ir-black
+      highlightLines: true
+      countIncrementalSlides: true
+---
+
+
+```{r setup, include=FALSE}
+
+
+library(ape)
+library(DESeq2)
+library(DiagrammeR)
+library(DiagrammeRsvg)
+require(emo)
+library(extrafont)
+library(geiger)
+require(icons)
+require(knitr)
+library(lattice)
+library(phytools)
+library(raster)
+require(rmarkdown)
+library(rsvg)
+library(scales)
+library(vioplot)
+require(xaringan)
+require(xaringanExtra)
+
+
+options(htmltools.dir.version = FALSE)
+# preset code chunk options
+knitr::opts_chunk$set(dpi = 300,            # ensures high resolution images
+                      echo = FALSE,         # FALSE: code chunks don't show
+                      warning = FALSE,      # FALSE: suppresses warning messages
+                      error = FALSE,       # FALSE: Suppresses error messages
+                      fig.align = "center")
+
+```
+
+
+
+```{r, xaringan-slide-tone, echo = TRUE, include = FALSE}
+
+##xaringanExtra::use_slide_tone()
+
+```
+
+
+# Outline
+
+<br/>
+
+## Description of the data
+
+- Phylogenetic representation
+- Sample size
+- Size distribution
+
+
+--
+
+## Relationship between growth and size
+
+- Theoretical predictions
+- Empirical support
+
+--
+
+## Current evidence
+
+- Striking observations
+- Analysis of findings
+
+
+---
+
+
+```{r, eval = FALSE}
+
+##tree <- read.tree("../spp.tree.nwk")
+##tree
+
+data <- read.csv("../condensed_traits_NCBI.csv")
+str(data)
+names(data)
+
+spp.d1_lo <- data[!is.na(data$d1_lo), ]
+str(spp.d1_lo)
+length(spp.d1_lo$d1_lo)
+
+spp.d1_up <- data[!is.na(data$d1_up), ]
+str(spp.d1_up)
+length(spp.d1_up$d1_up)
+
+spp.rRNA <- data[!is.na(data$rRNA16S_genes), ]
+str(spp.rRNA)
+length(spp.rRNA$rRNA16S_genes)
+
+spp.tRNA <- data[!is.na(data$tRNA_genes), ]
+str(spp.tRNA)
+length(spp.tRNA$tRNA_genes)
+
+length(unique(data$species))
+length(data$species)
+
+tRNA <- aggregate(spp.tRNA$tRNA_genes, by = list(spp.tRNA$species), mean, na.action = na.rm)
+rRNA <- aggregate(spp.rRNA$rRNA16S_genes, by = list(spp.rRNA$species), mean, na.action = na.rm)
+d1_up <- aggregate(spp.d1_up$d1_up, by = list(spp.d1_up$species), mean, na.action = na.rm)
+d1_lo <- aggregate(spp.d1_lo$d1_lo, by = list(spp.d1_lo$species), mean, na.action = na.rm)
+
+
+dim(tRNA)
+names(tRNA) <- c("species", "tRNA")
+dim(rRNA)
+names(rRNA) <- c("species", "rRNA")
+dim(d1_up)
+names(d1_up) <- c("species", "d1_up")
+dim(d1_lo)
+names(d1_lo) <- c("species", "d1_lo")
+
+
+
+class(rRNA)
+names(rRNA)
+
+mrg1 <- merge(tRNA, rRNA, by = "species")
+class(mrg1)
+str(mrg1)
+
+mrg.data <- merge(mrg1, d1_up, by = "species")
+str(mrg.data)
+
+
+range(mrg.data[2])
+range(mrg.data[3])
+range(mrg.data[4])
+
+
+model1 <- lm(rRNA ~ d1_up, data = mrg.data)
+summary(model1)
+
+```
+
+
+```{r, out.width="60%", include = FALSE}
+
+layout(matrix(c(1, 1, 2, 2,
+                1, 1, 2, 2,
+                3, 3, 4, 4,
+                3, 3, 4, 4), nrow = 4, ncol = 4, byrow = TRUE))
+
+
+plot(model1)
+
+
+```
+
+
+
+
+
+```{r, include = FALSE}
+
+
+plot(rRNA ~ d1_up, data = mrg.data, las = 1, pch = 21, col = alpha("black", 0.5), bg = alpha("black", 0.5))
+abline(model1, lwd = 2, col = "orange")
+
+
+model2 <- lm(log(tRNA) ~ d1_up, data = mrg.data)
+summary(model2)
+
+plot(log(tRNA) ~ d1_up, data = mrg.data, las = 1, pch = 21, col = alpha("black", 0.5), bg = alpha("black", 0.5))
+abline(model2, lwd = 2, col = "skyblue")
+
+
+plot(log(tRNA) ~ rRNA, data = mrg.data, las = 1, pch = 21, col = alpha("black", 0.5), bg = alpha("black", 0.5))
+
+```
+
+
+
+
+
+```{r, include = FALSE}
+
+
+obj <- rep()
+for(i in mrg.data$species){
+    kingdom <- unique(data$superkingdom[data$species == i])
+    obj <- c(obj, kingdom)
+}
+
+mrg.data$kingdom <- obj
+
+head(mrg.data)
+
+model3 <- lm(log(tRNA) ~ rRNA, data = mrg.data)
+summary(model3)
+
+model4 <- lm(log(tRNA) ~ rRNA*d1_up, data = mrg.data)
+summary(model4)
+
+model4.1 <- lm(rRNA ~ d1_up*kingdom, data = mrg.data)
+summary(model4.1)
+
+model4.2 <- lm(rRNA ~ d1_up*kingdom + log(tRNA)*kingdom, data = mrg.data)
+summary(model4.2)
+
+mrg.data$ratio <- log(mrg.data$tRNA)/mrg.data$rRNA
+head(mrg.data)
+
+model4.3 <- lm(log(tRNA) ~ d1_up*kingdom, data = mrg.data)
+summary(model4.3)
+
+mrg.data2 <- merge(mrg.data, d1_lo, by = "species")
+str(mrg.data2)
+
+model5 <- lm(log(tRNA) ~ rRNA*d1_lo, data = mrg.data2)
+summary(model5)
+
+model5.1 <- lm(rRNA ~ d1_lo*kingdom, data = mrg.data2)
+summary(model5.1)
+
+
+
+```
+
+
+
+
+```{r, include = FALSE}
+
+## Model diagnosis
+
+
+layout(matrix(c(1, 1, 2, 2,
+                1, 1, 2, 2,
+                3, 3, 4, 4,
+                3, 3, 4, 4), nrow = 4, ncol = 4, byrow = TRUE))
+
+
+plot(model4.2)
+
+```
+
+
+
+
+```{r, include = FALSE}
+
+
+
+size.growth <- merge(doubling, d1_up, by = "species")
+
+
+obj <- rep()
+for(i in size.growth$species){
+    kingdom <- unique(data$superkingdom[data$species == i])
+    obj <- c(obj, kingdom)
+}
+
+size.growth$kingdom <- obj
+head(size.growth)
+
+cols3 <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(size.growth$kingdom))]
+
+model12 <- lm(log(doubling_h) ~ d1_up, data = size.growth)
+summary(model12)
+
+model12.1 <- lm(log(doubling_h) ~ d1_up*kingdom, data = size.growth)
+summary(model12.1)
+
+x <- seq(min(size.growth$d1_up), max(size.growth$d1_up), length = 30)
+
+
+
+```
+
+
+## On average, Archaea seem to be larger than Bacteria
+
+
+```{r, out.width="55%"}
+
+plot(log(doubling_h) ~ d1_up, data = size.growth, xlab = expression(paste("Cell diameter")~mu*m~(log[10])), ylab = "Doubling h (log)", las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+plot(log(doubling_h) ~ d1_up, data = size.growth, xlab = "", ylab = "", las = 1, pch = 21, col = cols2, bg = cols2, cex = 0.8, axes = FALSE)
+
+
+lines(x = x, y = (coef(model12)[1] + coef(model12)[2]*x), lwd = 2, col = "black")
+
+legend("topright", legend = levels(as.factor((size.growth$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+
+
+```
+
+---
+
+## On average, Archaea seem to be larger than Bacteria
+
+
+```{r, out.width="55%"}
+
+## Basic boxplot
+
+vioplot(d1_up ~ kingdom, data = mrg.data, border = NA, method = "jitter", side = "right", ylab = expression(paste("Cell size")~mu*m~(log[10])), xlab = "Kingdom", col = "white", las = 1)
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+vioplot(d1_up ~ kingdom, data = mrg.data, border = NA, method = "jitter", side = "right", ylab = "", xlab = "", col = c(alpha("red", 0.2), alpha("purple", 0.2)), las = 1)
+
+segments(x0 = 1, y0 = mean(mrg.data$d1_up[mrg.data$kingdom == "Archaea"]), x1 = 1.318, y1 = mean(mrg.data$d1_up[mrg.data$kingdom == "Archaea"]), lwd = 2, lty = 2, col = "blue")
+text(x = 1.4, y = mean(mrg.data$d1_up[mrg.data$kingdom == "Archaea"]), expression(mu))
+
+segments(x0 = 2, y0 = mean(mrg.data$d1_up[mrg.data$kingdom == "Bacteria"]), x1 = 2.318, y1 = mean(mrg.data$d1_up[mrg.data$kingdom == "Bacteria"]), lwd = 2, lty = 2, col = "blue")
+text(x = 2.4, y = mean(mrg.data$d1_up[mrg.data$kingdom == "Bacteria"]), expression(mu))
+
+mean(mrg.data$d1_up[mrg.data$kingdom == "Archaea"])
+mean(mrg.data$d1_up[mrg.data$kingdom == "Bacteria"])
+
+##stripchart(d1_up ~ kingdom, vertical = TRUE, data = mrg.data, method = "jitter", add = TRUE, pch = 20, col = c(alpha("red", 0.3), alpha("purple", 0.5)))
+
+
+```
+
+---
+class: left, bottom
+background-image: url("imgs/ribosomes.jpeg")
+background-position: center
+background-size: cover
+
+
+## Since ribosomes are required for protein synthesis, <br> their number and their rate of function determine <br> the rate of protein synthesis and cytoplasmic mass<br>  accumulation
+
+
+
+---
+
+## As cell size increases, the number rRNA genes increase in Bacteria. The opposite happens in Archaea though. How about the tRNA genes?
+
+
+```{r, include = FALSE}
+
+colors <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(mrg.data$kingdom))]
+
+```
+
+
+```{r, out.width="80%"}
+
+
+## Plotting rRNA vs d1_up + tRNA
+
+
+layout(matrix(c(1, 1, 2, 2,
+                1, 1, 2, 2,
+                0, 0, 0, 0,
+                0, 0, 0, 0), nrow = 4, ncol = 4, byrow = TRUE))
+
+
+## rRNA
+
+
+plot(rRNA ~ d1_up, data = mrg.data, las = 1, pch = 21, col = colors, bg = colors, cex = 0.8, type = "n", xlab = expression(paste("Cell size")~mu*m~(log[10])), ylab = "rRNA genes")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+plot(rRNA ~ d1_up, data = mrg.data, las = 1, pch = 21, col = colors, bg = colors, cex = 0.8, xlab = "", ylab = "", axes = FALSE)
+
+abline(lm(mrg.data$rRNA[mrg.data$kingdom == "Archaea"] ~ mrg.data$d1_up[mrg.data$kingdom == "Archaea"]), lwd = 2, col = "red")
+abline(lm(mrg.data$rRNA[mrg.data$kingdom == "Bacteria"] ~ mrg.data$d1_up[mrg.data$kingdom == "Bacteria"]), lwd = 2, col = "purple")
+
+legend("topleft", legend = levels(as.factor((mrg.data$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+
+
+```
+
+---
+
+## Similarly, the tRNA genes increase with size in both kingdoms, BUT the slope is now positive in Archaea
+
+```{r, out.width="80%"}
+
+
+layout(matrix(c(1, 1, 2, 2,
+                1, 1, 2, 2,
+                0, 0, 0, 0,
+                0, 0, 0, 0), nrow = 4, ncol = 4, byrow = TRUE))
+
+
+## rRNA
+
+
+plot(rRNA ~ d1_up, data = mrg.data, las = 1, pch = 21, col = colors, bg = colors, cex = 0.8, type = "n", xlab = expression(paste("Cell size")~mu*m~(log[10])), ylab = "rRNA genes")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+plot(rRNA ~ d1_up, data = mrg.data, las = 1, pch = 21, col = colors, bg = colors, cex = 0.8, xlab = "", ylab = "", axes = FALSE)
+
+abline(lm(mrg.data$rRNA[mrg.data$kingdom == "Archaea"] ~ mrg.data$d1_up[mrg.data$kingdom == "Archaea"]), lwd = 2, col = "red")
+abline(lm(mrg.data$rRNA[mrg.data$kingdom == "Bacteria"] ~ mrg.data$d1_up[mrg.data$kingdom == "Bacteria"]), lwd = 2, col = "purple")
+
+legend("topleft", legend = levels(as.factor((mrg.data$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+
+
+## tRNA
+
+
+plot(log(tRNA) ~ d1_up, data = mrg.data, las = 1, pch = 21, col = colors, bg = colors, cex = 0.8, type = "n", xlab = expression(paste("Cell size")~mu*m~(log[10])), ylab = "tRNA genes (log)")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+plot(log(tRNA) ~ d1_up, data = mrg.data, las = 1, pch = 21, col = colors, bg = colors, cex = 0.8, xlab = "", ylab = "", axes = FALSE)
+
+abline(lm(log(mrg.data$tRNA)[mrg.data$kingdom == "Archaea"] ~ mrg.data$d1_up[mrg.data$kingdom == "Archaea"]), lwd = 2, col = "red")
+abline(lm(log(mrg.data$tRNA)[mrg.data$kingdom == "Bacteria"] ~ mrg.data$d1_up[mrg.data$kingdom == "Bacteria"]), lwd = 2, col = "purple")
+
+legend("topright", legend = levels(as.factor((mrg.data$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+
+
+```
+
+---
+class: middle, center
+background-image: url("imgs/temp.jpeg")
+background-position: center
+background-size: cover
+
+
+How does temperature scale with cell size and growth?
+
+
+
+
+
+```{r, include = FALSE}
+
+
+## Optimum temp
+
+
+spp.temp.op <- data[!is.na(data$optimum_tmp), ]
+str(spp.temp.op)
+length(spp.temp.op$optimum_tmp)
+
+temp.op <- aggregate(spp.temp.op$optimum_tmp, by = list(spp.temp.op$species), mean, na.action = na.rm)
+
+dim(temp.op)
+names(temp.op) <- c("species", "tmp.op")
+
+mrg.tmp.op <- merge(temp.op, d1_lo, by = "species")
+class(mrg.tmp.op)
+str(mrg.tmp.op)
+head(mrg.tmp.op)
+
+mrg.tmp.op2 <- merge(mrg.tmp.op, d1_up, by = "species")
+str(mrg.tmp.op2)
+head(mrg.tmp.op2)
+dim(mrg.tmp.op2)
+
+obj <- rep()
+for(i in mrg.tmp.op2$species){
+    kingdom <- unique(data$superkingdom[data$species == i])
+    obj <- c(obj, kingdom)
+}
+
+mrg.tmp.op2$kingdom <- obj
+head(mrg.tmp.op2)
+str(mrg.tmp.op2)
+
+
+mrg.tmp.op3 <- merge(mrg.tmp.op2, doubling, by = "species")
+str(mrg.tmp.op3)
+head(mrg.tmp.op3)
+dim(mrg.tmp.op3)
+
+```
+
+
+
+```{r, include = FALSE}
+
+## Cell size and temp opt
+
+
+plot(d1_up ~ log(tmp.op), log = "y", data = mrg.tmp.op2, ylab = expression(paste("Cell diameter")~mu*m~(log[10])), xlab = "Optimum temperature \u00B0C (log)", las = 1, pch = 21, cex = 1.2, type = "n")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(mrg.tmp.op2$kingdom))]
+
+plot(d1_up ~ log(tmp.op), log = "y", data = mrg.tmp.op2, xlab = "", ylab = "", las = 1, pch = 21, col = cols, bg = cols, cex = 0.8, axes = FALSE)
+
+model13 <- lm(d1_up ~ log(tmp.op), data = mrg.tmp.op2)
+summary(model13)
+
+x <- seq(min(log(mrg.tmp.op2$tmp.op)), max(log(mrg.tmp.op2$tmp.op)), length = 30)
+
+lines(x = x, y = (coef(model13)[1] + coef(model13)[2]*x), lwd = 2, col = "black")
+
+legend("topleft", legend = levels(as.factor((mrg.tmp3$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+
+
+```
+
+
+
+```{r, include = FALSE}
+
+
+## Doubling and temp
+
+
+plot(log(doubling_h) ~ log(tmp.op), data = mrg.tmp.op3, ylab = "Doubling h (log)", xlab = "Optimum temperature \u00B0C (log)", las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols3 <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(mrg.tmp.op3$kingdom))]
+
+plot(log(doubling_h) ~ log(tmp.op), data = mrg.tmp.op3, xlab = "", ylab = "", las = 1, pch = 21, col = cols3, bg = cols3, cex = 0.8, axes = FALSE)
+
+model14 <- lm(log(doubling_h) ~ log(tmp.op), data = mrg.tmp.op3)
+summary(model14)
+
+x <- seq(min(log(mrg.tmp.op3$tmp)), max(log(mrg.tmp.op3$tmp)), length = 30)
+
+lines(x = x, y = (coef(model14)[1] + coef(model14)[2]*x), lwd = 2, col = "black")
+
+legend("bottomleft", legend = levels(as.factor((mrg.tmp3$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+
+
+```
+
+
+
+```{r, include = FALSE}
+
+cols <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(mrg.tmp.op2$kingdom))]
+model13 <- lm(d1_up ~ log(tmp.op), data = mrg.tmp.op2)
+summary(model13)
+
+x <- seq(min(log(mrg.tmp.op2$tmp.op)), max(log(mrg.tmp.op2$tmp.op)), length = 30)
+
+
+
+
+```
+
+
+---
+
+## Cell size increases with temperature in both Archaea and Bacteria
+
+
+
+```{r, out.width="80%"}
+
+
+layout(matrix(c(1, 1, 0, 0,
+                1, 1, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0), nrow = 4, ncol = 4, byrow = TRUE))
+
+## Cell size and temp opt
+
+
+plot(d1_up ~ log(tmp.op), log = "y", data = mrg.tmp.op2, ylab = expression(paste("Cell diameter")~mu*m~(log[10])), xlab = "Optimum temperature \u00B0C (log)", las = 1, pch = 21, cex = 1.2, type = "n")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+plot(d1_up ~ log(tmp.op), log = "y", data = mrg.tmp.op2, xlab = "", ylab = "", las = 1, pch = 21, col = cols, bg = cols, cex = 0.8, axes = FALSE)
+
+lines(x = x, y = (coef(model13)[1] + coef(model13)[2]*x), lwd = 2, col = "black")
+
+legend("topleft", legend = levels(as.factor((mrg.tmp3$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+
+
+```
+
+
+
+```{r, include = FALSE}
+
+cols3 <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(mrg.tmp.op3$kingdom))]
+model14 <- lm(log(doubling_h) ~ log(tmp.op), data = mrg.tmp.op3)
+summary(model14)
+
+x <- seq(min(log(mrg.tmp.op3$tmp)), max(log(mrg.tmp.op3$tmp)), length = 30)
+
+
+```
+
+
+---
+
+## Growth is faster as temperature increases in Archaea and Bacteria
+
+
+
+```{r, out.width="80%"}
+
+
+layout(matrix(c(1, 1, 2, 2,
+                1, 1, 2, 2,
+                0, 0, 0, 0,
+                0, 0, 0, 0), nrow = 4, ncol = 4, byrow = TRUE))
+
+## Cell size and temp opt
+
+
+plot(d1_up ~ log(tmp.op), log = "y", data = mrg.tmp.op2, ylab = expression(paste("Cell diameter")~mu*m~(log[10])), xlab = "Optimum temperature \u00B0C (log)", las = 1, pch = 21, cex = 1.2, type = "n")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+plot(d1_up ~ log(tmp.op), log = "y", data = mrg.tmp.op2, xlab = "", ylab = "", las = 1, pch = 21, col = cols, bg = cols, cex = 0.8, axes = FALSE)
+
+lines(x = x, y = (coef(model13)[1] + coef(model13)[2]*x), lwd = 2, col = "black")
+
+legend("topleft", legend = levels(as.factor((mrg.tmp3$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+
+
+## Doubling and temp
+
+
+plot(log(doubling_h) ~ log(tmp.op), data = mrg.tmp.op3, ylab = "Doubling h (log)", xlab = "Optimum temperature \u00B0C (log)", las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+
+
+plot(log(doubling_h) ~ log(tmp.op), data = mrg.tmp.op3, xlab = "", ylab = "", las = 1, pch = 21, col = cols3, bg = cols3, cex = 0.8, axes = FALSE)
+
+
+lines(x = x, y = (coef(model14)[1] + coef(model14)[2]*x), lwd = 2, col = "black")
+
+legend("bottomleft", legend = levels(as.factor((mrg.tmp3$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+
+
+
+
+```
+
+
+---
+class: middle, center
+background-position: center
+background-size: cover
+
+
+## "Populations of larger organisms grow more slowly than populations of smaller organisms"
+
+
+
+
+
+```{r, include = FALSE}
+
+
+## Interaction between temperature and growth
+
+
+hist(mrg.tmp.op3$d1_up, xlim = c(0, 7), main = "", xlab = expression(paste("Cell size")~mu*m~(log[10])), las = 1)
+box()
+
+mean(mrg.tmp.op3$d1_up)
+
+mrg.tmp.op3$col <- rep(NA, nrow(mrg.tmp.op3))
+for(i in 1:nrow(mrg.tmp.op3)){
+    size <- mrg.tmp.op3$d1_up[i]
+
+    if(size > mean(mrg.tmp.op3$d1_up)){
+        mrg.tmp.op3[i, "col"] <- "gray"
+    }
+    if(size < mean(mrg.tmp.op3$d1_up)){
+        mrg.tmp.op3[i, "col"] <- "black"
+    }
+
+}
+
+mrg.tmp.op3$col
+
+```
+
+---
+
+
+```{r, out.width="60%"}
+
+## Doubling and temp*cell size
+
+par(mar = c(5, 4, 1.5, 4))
+
+colfunc <- colorRampPalette(c("red", "blue"))
+
+plot(log(doubling_h) ~ log(tmp.op), data = mrg.tmp.op3, ylab = "Doubling h (log)", xlab = "Optimum temperature \u00B0C (log)", las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+plot(log(doubling_h) ~ log(tmp.op), data = mrg.tmp.op3, xlab = "", ylab = "", las = 1, pch = 21, col = colfunc(length(mrg.tmp.op3$d1_up)), bg = colfunc(length(mrg.tmp.op3$d1_up)), cex = 0.8, axes = FALSE)
+
+x <- seq(min(log(mrg.tmp.op3$tmp)), max(log(mrg.tmp.op3$tmp)), length = 30)
+
+lines(x = x, y = (coef(model14)[1] + coef(model14)[2]*x), lwd = 2, col = "black")
+
+par(xpd = TRUE)
+
+legend_image <- as.raster(matrix(colfunc(length(mrg.tmp.op3$d1_up)), ncol = 1))
+rasterImage(legend_image, 4.9, 1, 5, 3)
+text(x = 4.8, y = seq(1, 3, length = 4), labels = seq(min(mrg.tmp.op3$d1_up), max(mrg.tmp.op3$d1_up), length = 4), cex = 0.6)
+text(x = 4.9, y = 3.7, expression(paste("Cell size")), cex = 0.7)
+text(x = 4.9, y = 3.5, expression(mu*m~(log[10])), cex = 0.7)
+
+
+```
+
+
+
+```{r, include = FALSE}
+
+
+## Plotting d1_up
+
+colors <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(mrg.data$kingdom))]
+
+plot(log(tRNA) ~ rRNA, data = mrg.data, las = 1, pch = 21, col = colors, bg = colors, cex = 0.8, type = "n", xlab = "rRNA 16S genes", ylab = "tRNA genes")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+plot(log(tRNA) ~ rRNA, data = mrg.data, las = 1, pch = 21, col = colors, bg = colors, cex = 0.8, xlab = "", ylab = "", axes = FALSE)
+
+range.rRNA <- seq(min(mrg.data$rRNA), max(mrg.data$rRNA), length = 30)
+range.d1_up <- seq(min(mrg.data$d1_up), max(mrg.data$d1_up), length = 30)
+
+pred <- (mean(mrg.data$d1_up) + c(-1,0,1)*sd(mrg.data$d1_up))
+
+lines(x = range.rRNA, y = predict(model4, data.frame(d1_up = as.vector(pred[1]), rRNA = range.rRNA)), lwd = 2.7, lty = 2, col = alpha("black", 0.5))
+
+
+positive <- predict(model4, data.frame(d1_up = as.vector(pred[1]), rRNA = range.rRNA))+predict(model4, data.frame(d1_up = as.vector(pred[1]), rRNA = range.rRNA), se.fit = TRUE)$se.fit
+negative <- predict(model4, data.frame(d1_up = as.vector(pred[1]), rRNA = range.rRNA))-predict(model4, data.frame(d1_up = as.vector(pred[1]), rRNA = range.rRNA), se.fit = TRUE)$se.fit
+polygon(c(rev(range.rRNA), range.rRNA), c(rev(positive), negative), border = FALSE, col = alpha("gold", 0.1))
+
+lines(x = range.rRNA, y = predict(model4, data.frame(d1_up = as.vector(pred[2]), rRNA = range.rRNA)), lwd = 2.7, lty = 1, col = alpha("black", 0.5))
+
+positive <- predict(model4, data.frame(d1_up = as.vector(pred[2]), rRNA = range.rRNA))+predict(model4, data.frame(d1_up = as.vector(pred[2]), rRNA = range.rRNA), se.fit = TRUE)$se.fit
+negative <- predict(model4, data.frame(d1_up = as.vector(pred[2]), rRNA = range.rRNA))-predict(model4, data.frame(d1_up = as.vector(pred[2]), rRNA = range.rRNA), se.fit = TRUE)$se.fit
+polygon(c(rev(range.rRNA), range.rRNA), c(rev(positive), negative), border = FALSE, col = alpha("gold", 0.1))
+
+lines(x = range.rRNA, y = predict(model4, data.frame(d1_up = as.vector(pred[3]), rRNA = range.rRNA)), lwd = 2.7, lty = 3, col = alpha("black", 0.5))
+
+positive <- predict(model4, data.frame(d1_up = as.vector(pred[3]), rRNA = range.rRNA))+predict(model4, data.frame(d1_up = as.vector(pred[3]), rRNA = range.rRNA), se.fit = TRUE)$se.fit
+negative <- predict(model4, data.frame(d1_up = as.vector(pred[3]), rRNA = range.rRNA))-predict(model4, data.frame(d1_up = as.vector(pred[3]), rRNA = range.rRNA), se.fit = TRUE)$se.fit
+polygon(c(rev(range.rRNA), range.rRNA), c(rev(positive), negative), border = FALSE, col = alpha("gold", 0.1))
+
+leg <- c("+ 1 SD", "Mean", "- 1 SD")
+legend(x = 0.4, y = 4.9, legend = leg, lty = c(2, 1, 3), lwd = 2, col = alpha("black", 0.5), bty = "n")
+text(x = 3, y = 4.95, expression(paste("Cell diameter")~mu*m~(log[10])))
+legend("bottomright", legend = levels(as.factor((mrg.data$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+
+
+```
+
+
+
+
+
+```{r, include = FALSE}
+
+
+## Plotting d1_lo
+
+colors2 <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(mrg.data2$kingdom))]
+
+plot(log(tRNA) ~ rRNA, data = mrg.data2, las = 1, pch = 21, col = colors2, bg = colors2, cex = 0.8, type = "n", xlab = "rRNA 16S genes", ylab = "tRNA genes")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+plot(log(tRNA) ~ rRNA, data = mrg.data2, las = 1, pch = 21, col = colors2, bg = colors2, cex = 0.8, xlab = "", ylab = "", axes = FALSE)
+
+range.rRNA <- seq(min(mrg.data2$rRNA), max(mrg.data2$rRNA), length = 30)
+range.d1_lo <- seq(min(mrg.data2$d1_lo), max(mrg.data2$d1_lo), length = 30)
+
+pred <- (mean(mrg.data2$d1_lo) + c(-1,0,1)*sd(mrg.data2$d1_lo))
+
+lines(x = range.rRNA, y = predict(model5, data.frame(d1_lo = as.vector(pred[1]), rRNA = range.rRNA)), lwd = 2.7, lty = 2, col = alpha("black", 0.5))
+
+
+positive <- predict(model5, data.frame(d1_lo = as.vector(pred[1]), rRNA = range.rRNA))+predict(model5, data.frame(d1_lo = as.vector(pred[1]), rRNA = range.rRNA), se.fit = TRUE)$se.fit
+negative <- predict(model5, data.frame(d1_lo = as.vector(pred[1]), rRNA = range.rRNA))-predict(model5, data.frame(d1_lo = as.vector(pred[1]), rRNA = range.rRNA), se.fit = TRUE)$se.fit
+polygon(c(rev(range.rRNA), range.rRNA), c(rev(positive), negative), border = FALSE, col = alpha("gold", 0.1))
+
+lines(x = range.rRNA, y = predict(model5, data.frame(d1_lo = as.vector(pred[2]), rRNA = range.rRNA)), lwd = 2.7, lty = 1, col = alpha("black", 0.5))
+
+positive <- predict(model5, data.frame(d1_lo = as.vector(pred[2]), rRNA = range.rRNA))+predict(model5, data.frame(d1_lo = as.vector(pred[2]), rRNA = range.rRNA), se.fit = TRUE)$se.fit
+negative <- predict(model5, data.frame(d1_lo = as.vector(pred[2]), rRNA = range.rRNA))-predict(model5, data.frame(d1_lo = as.vector(pred[2]), rRNA = range.rRNA), se.fit = TRUE)$se.fit
+polygon(c(rev(range.rRNA), range.rRNA), c(rev(positive), negative), border = FALSE, col = alpha("gold", 0.1))
+
+lines(x = range.rRNA, y = predict(model5, data.frame(d1_lo = as.vector(pred[3]), rRNA = range.rRNA)), lwd = 2.7, lty = 3, col = alpha("black", 0.5))
+
+positive <- predict(model5, data.frame(d1_lo = as.vector(pred[3]), rRNA = range.rRNA))+predict(model5, data.frame(d1_lo = as.vector(pred[3]), rRNA = range.rRNA), se.fit = TRUE)$se.fit
+negative <- predict(model5, data.frame(d1_lo = as.vector(pred[3]), rRNA = range.rRNA))-predict(model5, data.frame(d1_lo = as.vector(pred[3]), rRNA = range.rRNA), se.fit = TRUE)$se.fit
+polygon(c(rev(range.rRNA), range.rRNA), c(rev(positive), negative), border = FALSE, col = alpha("gold", 0.1))
+
+leg <- c("+ 1 SD", "Mean", "- 1 SD")
+legend(x = 0.4, y = 4.9, legend = leg, lty = c(2, 1, 3), lwd = 2, col = alpha("black", 0.5), bty = "n")
+text(x = 3, y = 4.95, expression(paste("Cell diameter")~mu*m~(log[10])))
+legend("bottomright", legend = levels(as.factor((mrg.data2$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+
+
+
+```
+
+
+
+
+
+```{r, include = FALSE}
+
+layout(matrix(c(1, 1, 2, 2,
+                1, 1, 2, 2,
+                3, 3, 4, 4,
+                3, 3, 4, 4), nrow = 4, ncol = 4, byrow = TRUE))
+
+
+plot(model6)
+
+
+```
+
+
+
+
+
+```{r, include = FALSE}
+
+## Parameters pertaining to the macromolecular synthesis rates in exponentially growing E. coli B/r as a function of growth rate at 37°C from Bremer and Dennis, 2008
+
+
+peptide.elongation <- data.frame(Cp = c(13, 18, 21, 22, 22, 22), u = c(0.6, 1.0, 1.5, 2.0, 2.5, 3.0), t = c(100, 60, 40, 30, 24, 20))
+peptide.elongation
+
+
+Ribo.Cell <- data.frame(Nr = c(8, 15, 26, 44, 61, 73), u = c(0.6, 1.0, 1.5, 2.0, 2.5, 3.0), t = c(100, 60, 40, 30, 24, 20))
+Ribo.Cell
+
+mRNA.Cell <- data.frame(Rm = c(10, 20, 28, 40, 46, 43), u = c(0.6, 1.0, 1.5, 2.0, 2.5, 3.0), t = c(100, 60, 40, 30, 24, 20))
+mRNA.Cell
+
+Ribo.Activity <- data.frame(Br = c(85, 85, 85, 85, 85, 85), u = c(0.6, 1.0, 1.5, 2.0, 2.5, 3.0), t = c(100, 60, 40, 30, 24, 20))
+Ribo.Activity
+
+Protein.Cell <- data.frame(Pc = c(7.6, 11.9, 16.4, 21.5, 24.0, 23.7), u = c(0.6, 1.0, 1.5, 2.0, 2.5, 3.0), t = c(100, 60, 40, 30, 24, 20))
+Protein.Cell
+
+tRNA.cell <- data.frame(Nt = c(74, 139, 241, 408, 571, 680), u = c(0.6, 1.0, 1.5, 2.0, 2.5, 3.0), t = c(100, 60, 40, 30, 24, 20))
+tRNA.cell
+
+trans.mRNA <- data.frame(Ntrans = c(16, 20, 30, 37, 45, 57), u = c(0.6, 1.0, 1.5, 2.0, 2.5, 3.0), t = c(100, 60, 40, 30, 24, 20))
+trans.mRNA
+
+
+```
+
+
+
+
+```{r, include = FALSE}
+
+## Average number of translations vs Doubling time
+
+
+
+par(mar = c(5, 6, 1.5, 1.5))
+
+plot(trans.mRNA$Ntrans ~ peptide.elongation$u, ylab = expression(N[trans]==3*(ln~2/t)*P[c]/R[m]), xlab = expression(paste("Doubling/h")~(mu)), las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n", main = expression(italic("Escherichia coli")))
+mtext("Average number of translations per mRNA", side = 2, line = 4.5)
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+plot(trans.mRNA$Ntrans ~ peptide.elongation$u, ylab = " ", xlab = " ", las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, axes = FALSE)
+
+model9 <- lm(trans.mRNA$Ntrans ~ peptide.elongation$u)
+summary(model9)
+
+x <- seq(min(peptide.elongation$u), max(peptide.elongation$u), length = 6)
+
+lines(x = x, y = (coef(model9)[1] + coef(model9)[2]*x), lwd = 2, col = "black")
+
+
+```
+
+
+
+
+
+```{r, include = FALSE}
+
+
+## Temperature vs cell size
+
+spp.d1_lo <- data[!is.na(data$d1_lo), ]
+str(spp.d1_lo)
+length(spp.d1_lo$d1_lo)
+
+spp.d1_up <- data[!is.na(data$d1_up), ]
+str(spp.d1_up)
+length(spp.d1_up$d1_up)
+
+spp.temp <- data[!is.na(data$growth_tmp), ]
+str(spp.temp)
+length(spp.temp$growth_tmp)
+
+spp.doubling <- data[!is.na(data$doubling_h), ]
+str(spp.doubling)
+length(spp.doubling$doubling_h)
+
+doubling <- aggregate(spp.doubling$doubling_h, by = list(spp.doubling$species), mean, na.action = na.rm)
+temp <- aggregate(spp.temp$growth_tmp, by = list(spp.temp$species), mean, na.action = na.rm)
+d1_up <- aggregate(spp.d1_up$d1_up, by = list(spp.d1_up$species), mean, na.action = na.rm)
+d1_lo <- aggregate(spp.d1_lo$d1_lo, by = list(spp.d1_lo$species), mean, na.action = na.rm)
+
+
+dim(doubling)
+names(doubling) <- c("species", "doubling_h")
+dim(temp)
+names(temp) <- c("species", "tmp")
+dim(d1_up)
+names(d1_up) <- c("species", "d1_up")
+dim(d1_lo)
+names(d1_lo) <- c("species", "d1_lo")
+
+
+mrg.tmp <- merge(temp, d1_lo, by = "species")
+class(mrg.tmp)
+str(mrg.tmp)
+head(mrg.tmp)
+
+mrg.tmp2 <- merge(mrg.tmp, d1_up, by = "species")
+str(mrg.tmp2)
+head(mrg.tmp2)
+dim(mrg.tmp2)
+
+obj <- rep()
+for(i in mrg.tmp2$species){
+    kingdom <- unique(data$superkingdom[data$species == i])
+    obj <- c(obj, kingdom)
+}
+
+mrg.tmp2$kingdom <- obj
+head(mrg.tmp2)
+
+
+mrg.tmp3 <- merge(mrg.tmp2, doubling, by = "species")
+str(mrg.tmp3)
+head(mrg.tmp3)
+dim(mrg.tmp3)
+
+
+```
+
+
+
+```{r, include = FALSE}
+
+
+
+## Cell size and temp
+
+
+plot(d1_up ~ log(tmp), log = "y", data = mrg.tmp2, ylab = expression(paste("Cell diameter")~mu*m~(log[10])), xlab = "Growth temperature \u00B0C (log)", las = 1, pch = 21, cex = 1.2, type = "n")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(mrg.tmp2$kingdom))]
+
+plot(d1_up ~ log(tmp), log = "y", data = mrg.tmp2, xlab = "", ylab = "", las = 1, pch = 21, col = cols, bg = cols, cex = 0.8)
+
+model10 <- lm(d1_up ~ log(tmp), data = mrg.tmp2)
+summary(model10)
+
+x <- seq(min(log(mrg.tmp2$tmp)), max(log(mrg.tmp2$tmp)), length = 30)
+
+lines(x = x, y = (coef(model10)[1] + coef(model10)[2]*x), lwd = 2, col = "black")
+
+
+```
+
+
+
+
+```{r, include = FALSE}
+
+## Doubling and temp
+
+
+plot(log(doubling_h) ~ log(tmp), data = mrg.tmp3, ylab = "Doubling h (log)", xlab = "Growth temperature \u00B0C (log)", las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols2 <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(mrg.tmp3$kingdom))]
+
+plot(log(doubling_h) ~ log(tmp), data = mrg.tmp3, xlab = "", ylab = "", las = 1, pch = 21, col = cols2, bg = cols2, cex = 0.8, axes = FALSE)
+
+model11 <- lm(log(doubling_h) ~ log(tmp), data = mrg.tmp3)
+summary(model11)
+
+x <- seq(min(log(mrg.tmp3$tmp)), max(log(mrg.tmp3$tmp)), length = 30)
+
+lines(x = x, y = (coef(model11)[1] + coef(model11)[2]*x), lwd = 2, col = "black")
+
+
+```
+
+
+
+```{r, include = FALSE}
+
+
+layout(matrix(c(0, 0, 0, 0,
+                1, 1, 2, 2,
+                1, 1, 2, 2,
+                0, 0, 0, 0), nrow = 4, ncol = 4, byrow = TRUE))
+
+plot(d1_up ~ log(tmp), log = "y", data = mrg.tmp2, ylab = expression(paste("Cell diameter")~mu*m~(log[10])), xlab = "Growth temperature \u00B0C (log)", las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+plot(d1_up ~ log(tmp), log = "y", data = mrg.tmp2, xlab = "", ylab = "", las = 1, pch = 21, col = cols, bg = cols, cex = 0.8, axes = FALSE)
+
+x <- seq(min(log(mrg.tmp2$tmp)), max(log(mrg.tmp2$tmp)), length = 30)
+
+lines(x = x, y = (coef(model10)[1] + coef(model10)[2]*x), lwd = 2, col = "black")
+
+
+plot(log(doubling_h) ~ log(tmp), data = mrg.tmp3, ylab = "Doubling h (log)", xlab = "Growth temperature \u00B0C (log)", las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+plot(log(doubling_h) ~ log(tmp), data = mrg.tmp3, xlab = "", ylab = "", las = 1, pch = 21, col = cols2, bg = cols2, cex = 0.8, axes = FALSE)
+
+x <- seq(min(log(mrg.tmp3$tmp)), max(log(mrg.tmp3$tmp)), length = 30)
+
+lines(x = x, y = (coef(model11)[1] + coef(model11)[2]*x), lwd = 2, col = "black")
+
+
+```
+
+
+
