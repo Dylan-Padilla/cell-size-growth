@@ -5,6 +5,10 @@
     <meta charset="utf-8" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <script src="libs/tone/Tone.js"></script>
+    <script src="libs/slide-tone/slide-tone.js"></script>
+    <script src="libs/kePrint/kePrint.js"></script>
+    <link href="libs/lightable/lightable.css" rel="stylesheet" />
     <link rel="stylesheet" href="default.css" type="text/css" />
   </head>
   <body>
@@ -23,6 +27,31 @@ class: center, middle, inverse, title-slide
 
 
 
+
+
+&lt;style type="text/css"&gt;
+
+pre {
+  max-height: 200px;
+  overflow-y: visible;
+  overflow-x: visible;
+  scrollbar-color: #007 #bada55;
+}
+
+pre[class] {
+  max-height: 100px;
+}
+
+
+.scroll-100 {
+  max-height: 100px;
+  overflow-y: visible;
+
+}
+
+
+
+&lt;/style&gt;
 
 
 
@@ -63,144 +92,296 @@ class: center, middle, inverse, title-slide
 
 
 
+.pull-left[
+
+
+&lt;img src="index_files/figure-html/unnamed-chunk-4-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+--
+
+
+
+.pull-right[
 
 
 
 
+```r
+## Number of species per kingdom
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## On average, Archaea seem to be larger than Bacteria
-
-
-&lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" width="55%" style="display: block; margin: auto;" /&gt;
-
----
-
-## On average, Archaea seem to be larger than Bacteria
-
-
-&lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" width="55%" style="display: block; margin: auto;" /&gt;
-
-```
-## [1] 1.515027
+head(sg.dat$species[sg.dat$kingdom == "Archaea"])
 ```
 
 ```
-## [1] 1.035544
+## [1] "Archaeoglobus_fulgidus"   "Geoglobus_ahangari"      
+## [3] "Halobacterium_salinarum"  "Halococcus_hamelinensis" 
+## [5] "Haloterrigena_turkmenica" "Ignicoccus_hospitalis"
 ```
 
----
-class: left, bottom
-background-image: url("imgs/ribosomes.jpeg")
-background-position: center
-background-size: cover
+```r
+length(sg.dat$species[sg.dat$kingdom == "Archaea"])
+```
+
+```
+## [1] 116
+```
+
+```r
+head(sg.dat$species[sg.dat$kingdom == "Bacteria"])
+```
+
+```
+## [1] "Alicyclobacillus_pomorum"  "Alkalibacterium_iburiense"
+## [3] "Anaerobranca_gottschalkii" "Anaerolinea_thermolimosa" 
+## [5] "Azotobacter_chroococcum"   "Bacillus_anthracis"
+```
+
+```r
+length(sg.dat$species[sg.dat$kingdom == "Bacteria"])
+```
+
+```
+## [1] 68
+```
 
 
-## Since ribosomes are required for protein synthesis, &lt;br&gt; their number and their rate of function determine &lt;br&gt; the rate of protein synthesis and cytoplasmic mass&lt;br&gt;  accumulation
-
-
-
----
-
-## As cell size increases, the number rRNA genes increase in Bacteria. The opposite happens in Archaea though. How about the tRNA genes?
-
-
-
-
-
-&lt;img src="index_files/figure-html/unnamed-chunk-10-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-
----
-
-## Similarly, the tRNA genes increase with size in both kingdoms, BUT the slope is now positive in Archaea
-
-&lt;img src="index_files/figure-html/unnamed-chunk-11-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-
----
-class: middle, center
-background-image: url("imgs/temp.jpeg")
-background-position: center
-background-size: cover
-
-
-How does temperature scale with cell size and growth?
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-
-## Cell size increases with temperature in both Archaea and Bacteria
-
-
-
-&lt;img src="index_files/figure-html/unnamed-chunk-16-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-
-
-
-
-
-
----
-
-## Growth is faster as temperature increases in Archaea and Bacteria
-
-
-
-&lt;img src="index_files/figure-html/unnamed-chunk-18-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-
-
----
-class: middle, center
-background-position: center
-background-size: cover
-
-
-## "Populations of larger organisms grow more slowly than populations of smaller organisms"
-
-
-
-
+]
 
 
 
 ---
 
 
-&lt;img src="index_files/figure-html/unnamed-chunk-20-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+.pull-left[
+
+
+&lt;img src="index_files/figure-html/unnamed-chunk-6-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+
+.pull-right[
+
+
+
+
+```r
+## Size range
+
+range(sg.dat$d1_up)
+```
+
+```
+## [1] 0.15 6.30
+```
+
+
+]
+
+
+---
+
+
+
+.pull-left[
+
+
+&lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
+
+]
+
+--
+
+
+.pull-right[
+
+
+
+&lt;img src="index_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+
+---
+
+
+.pull-left[
+
+
+
+&lt;img src="index_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+--
+
+.pull-right[
+
+&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;
+
+
+```r
+kable(as.data.frame(summary(model1)$tTable), digits = 3, row.names = TRUE) %&gt;%
+  kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
+```
+
+&lt;table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Value &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std.Error &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; t-value &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; p-value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.128 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18.454 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.061 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.951 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; d1_up &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.059 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.023 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -2.553 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.012 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+
+
+]
+
+
+---
+
+
+
+
+
+
+.pull-left[
+
+
+
+&lt;img src="index_files/figure-html/unnamed-chunk-13-1.png" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+
+---
+
+
+.pull-left[
+
+
+&lt;img src="index_files/figure-html/unnamed-chunk-14-1.png" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+--
+
+
+.pull-right[
+
+
+&lt;br&gt;&lt;br&gt;
+
+
+```r
+kable(as.data.frame(summary(model3)$tTable), digits = 3, row.names = TRUE) %&gt;%
+  kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
+```
+
+&lt;table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Value &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std.Error &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; t-value &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; p-value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.955 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 182.421 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.005 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.996 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; d1_up &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.895 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.165 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.423 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.000 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+```r
+kable(as.data.frame(summary(model5)$tTable), digits = 3, row.names = TRUE) %&gt;%
+  kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
+```
+
+&lt;table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Value &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std.Error &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; t-value &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; p-value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.843 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.322 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.889 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.375 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; d1_up &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.016 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.004 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -4.060 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.000 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+]
+
+
+
+---
+
+
+&lt;img src="index_files/figure-html/unnamed-chunk-16-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+
+
+---
 
 
 
@@ -212,41 +393,105 @@ background-size: cover
 
 
 
+.pull-left[
+
+
+&lt;img src="index_files/figure-html/unnamed-chunk-20-1.png" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+
+---
+
+
+.pull-left[
+
+
+&lt;img src="index_files/figure-html/unnamed-chunk-21-1.png" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+--
+
+
+.pull-right[
+
+
+&lt;br&gt;&lt;br&gt;
 
 
 
+```r
+kable(as.data.frame(summary(model6)$tTable), digits = 3, row.names = TRUE) %&gt;%
+  kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
+```
+
+&lt;table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Value &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std.Error &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; t-value &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; p-value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80.074 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9.991 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.014 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; log(tmp.op) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.475 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.018 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -25.732 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+```r
+kable(as.data.frame(summary(model7)$tTable), digits = 3, row.names = TRUE) %&gt;%
+  kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
+```
+
+&lt;table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Value &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Std.Error &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; t-value &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; p-value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.128 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18.583 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.995 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; log(tmp.op) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.289 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.119 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.430 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.016 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+]
 
 
 
