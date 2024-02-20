@@ -29,7 +29,12 @@ class: center, middle, inverse, title-slide
 
 
 
+
+
+
 &lt;style type="text/css"&gt;
+
+
 
 pre {
   max-height: 200px;
@@ -50,7 +55,6 @@ pre[class] {
 }
 
 
-
 &lt;/style&gt;
 
 
@@ -62,19 +66,19 @@ pre[class] {
 
 &lt;br/&gt;
 
-## Description of the data
-
-- Phylogenetic representation
-- Sample size
-- Size distribution
-
-
---
 
 ## Relationship between growth and size
 
 - Theoretical predictions
 - Empirical support
+
+--
+
+## Description of the data
+
+- Phylogenetic representation
+- Sample size
+- Size distribution
 
 --
 
@@ -85,6 +89,49 @@ pre[class] {
 
 
 ---
+class: center, middle
+background-image: url("imgs/bg-img.png")
+
+# Evolution of growth and size
+
+---
+
+
+.pull-left[
+
+
+&lt;center&gt;
+
+&lt;img src = "imgs/lynch-2022.png" width = 400 height = 520&lt;/img&gt; &lt;br&gt;
+
+Lynch et al., (2022)
+
+&lt;/center&gt;
+
+
+]
+
+--
+
+
+.pull-right[
+
+![](imgs/marshall-2022.png)&lt;br&gt;
+
+&lt;center&gt;
+
+Marshall et al., (2022)
+
+&lt;/center&gt;
+
+]
+
+
+
+
+
+---
+
 
 
 
@@ -228,6 +275,8 @@ range(sg.dat$d1_up)
 
 
 ```r
+model1 &lt;- gls(log(doubling_h) ~ d1_up, correlation = corBrownian(phy = tree.sg, form = ~species), data = sg.dat, method = "ML")
+
 kable(as.data.frame(summary(model1)$tTable), digits = 3, row.names = TRUE) %&gt;%
   kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
 ```
@@ -284,7 +333,17 @@ kable(as.data.frame(summary(model1)$tTable), digits = 3, row.names = TRUE) %&gt;
 
 
 ---
+class: center, middle
+background-image: url("imgs/ribosomes.jpeg")
+background-size: cover
 
+
+# Translation machinery
+
+
+
+
+---
 
 .pull-left[
 
@@ -300,10 +359,12 @@ kable(as.data.frame(summary(model1)$tTable), digits = 3, row.names = TRUE) %&gt;
 .pull-right[
 
 
-&lt;br&gt;&lt;br&gt;
+&lt;br&gt;
 
 
 ```r
+model3 &lt;- gls(rRNA ~ d1_up, correlation = corBrownian(phy = ctree, form = ~species), data = mrg.dat, method = "ML")
+
 kable(as.data.frame(summary(model3)$tTable), digits = 3, row.names = TRUE) %&gt;%
   kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
 ```
@@ -337,6 +398,8 @@ kable(as.data.frame(summary(model3)$tTable), digits = 3, row.names = TRUE) %&gt;
 &lt;/table&gt;
 
 ```r
+model5 &lt;- gls(log(tRNA) ~ d1_up, correlation = corBrownian(phy = ctree, form = ~species), data = mrg.dat, method = "ML")
+
 kable(as.data.frame(summary(model5)$tTable), digits = 3, row.names = TRUE) %&gt;%
   kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
 ```
@@ -382,6 +445,14 @@ kable(as.data.frame(summary(model5)$tTable), digits = 3, row.names = TRUE) %&gt;
 
 
 ---
+class: center, middle
+background-image: url("imgs/temp.jpeg")
+background-size: cover
+
+How does temperature scale with size and growth?
+
+
+---
 
 
 
@@ -419,11 +490,13 @@ kable(as.data.frame(summary(model5)$tTable), digits = 3, row.names = TRUE) %&gt;
 .pull-right[
 
 
-&lt;br&gt;&lt;br&gt;
+&lt;br&gt;
 
 
 
 ```r
+model6 &lt;- gls(d1_up ~ log(tmp.op), correlation = corBrownian(phy = tree.tmp, form = ~species), data = tmp.dat, method = "ML")
+
 kable(as.data.frame(summary(model6)$tTable), digits = 3, row.names = TRUE) %&gt;%
   kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
 ```
@@ -457,6 +530,8 @@ kable(as.data.frame(summary(model6)$tTable), digits = 3, row.names = TRUE) %&gt;
 &lt;/table&gt;
 
 ```r
+model7 &lt;- gls(log(doubling_h) ~ log(tmp.op), correlation = corBrownian(phy = tree.tmp2, form = ~species), data = tmp.dat2, method = "ML")
+
 kable(as.data.frame(summary(model7)$tTable), digits = 3, row.names = TRUE) %&gt;%
   kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
 ```
