@@ -128,7 +128,7 @@ background-image: url("imgs/bg-img.png")
 
 <center>
 
-<img src = "imgs/lynch-2022.png" width = 400 height = 520</img> <br>
+<img src = "imgs/Lynch-2022.png" width = 400 height = 520</img> <br>
 
 Lynch et al., (2022)
 
