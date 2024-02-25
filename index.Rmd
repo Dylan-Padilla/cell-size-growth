@@ -142,11 +142,11 @@ Lynch et al., (2022)
 
 .pull-right[
 
-![](imgs/marshall-2022.png)<br>
-
 <center>
 
-Marshall et al., (2022)
+<img src = "imgs/Nielsen, 2006.png" width = 200 height = 530</img> <br>
+
+Nielsen, (2006)
 
 </center>
 
@@ -304,6 +304,23 @@ mod <- lm(log10(doubling_h) ~ log10(volume), data = v.dat)
 pg.mod <- gls(log10(doubling_h) ~ log10(volume), correlation = corBrownian(phy = tree.vol, form = ~species), data = vol.dat, method = "ML")
 #summary(pg.mod)
 
+## IC
+
+SSX <- sum(round((log10(vol.dat$volume) - mean(log10(vol.dat$volume)))^2), 2)
+s2 <- var(log10(vol.dat$doubling_h))
+n <- length(vol.dat$doubling_h)
+x <- seq(min(log10(vol.dat$volume)), max(log10(vol.dat$volume)), length = length(vol.dat$species))
+m.x <- mean(round(log(vol.dat$volume), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(pg.mod)[1] + coef(pg.mod)[2]*x) + ic.s
+lower.i <- (coef(pg.mod)[1] + coef(pg.mod)[2]*x) + ic.i
+
+
+
 cols <- setNames(c("purple", "orange"), levels(as.factor(vol.dat$kingdom)))
 vol.dat$kingdom <- as.factor(vol.dat$kingdom)
 
@@ -317,9 +334,8 @@ par(new = TRUE)
 
 plot(log10(doubling_h) ~ log10(volume), data = vol.dat, type = "p", pch = 16, col = cols[vol.dat$kingdom], bg = cols[vol.dat$kingdom], las = 1, ylab = "", xlab = "", axes = FALSE)
 
-x <- seq(min(log10(vol.dat$volume)), max(log10(vol.dat$volume)), length = length(vol.dat$species))
-
 lines(x, y = (coef(pg.mod)[1] + coef(pg.mod)[2]*x), lwd = 2)
+polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
 
 legend("topright", legend = paste("n =", length(vol.dat$species), sep = " "), bty = "n")
 legend("bottomleft", legend = unique(vol.dat$kingdom), pch = 16, col = cols, bg = cols, bty = "n")
@@ -416,6 +432,21 @@ mod4 <- lm(log10(tRNA) ~ log10(volume), data = tran.dat)
 #mod4 <- gls(log10(tRNA) ~ log10(volume), correlation = corBrownian(phy = tree.tran, form = ~species), data = tran.dat, method = "ML")
 #summary(mod4)
 
+
+SSX <- sum(round((log10(tran.dat$volume) - mean(log10(tran.dat$volume)))^2), 2)
+s2 <- var(log10(tran.dat$rRNA))
+n <- length(tran.dat$rRNA)
+x <- seq(min(log10(tran.dat$volume)), max(log10(tran.dat$volume)), length = length(tran.dat$species))
+m.x <- mean(round(log(tran.dat$volume), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(mod3)[1] + coef(mod3)[2]*x) + ic.s
+lower.i <- (coef(mod3)[1] + coef(mod3)[2]*x) + ic.i
+
+
 cols2 <- setNames(c("purple", "orange"), levels(as.factor(tran.dat$kingdom)))
 
 plot(log10(rRNA) ~ log10(volume), data = tran.dat, type = "n", pch = 16, las = 1, ylab = expression(log[10]~rRNA), xlab = expression(paste("Cell volume ", log[10], sep = " ")(mu*m^3)))
@@ -426,9 +457,8 @@ par(new = TRUE)
 
 plot(log10(rRNA) ~ log10(volume), data = tran.dat, type = "p", pch = 16, col = cols2[tran.dat$kingdom], bg = cols2[tran.dat$kingdom], las = 1, axes = FALSE, xaxt = "n", ylab = "", xlab = "")
 
-x <- seq(min(log10(tran.dat$volume)), max(log10(tran.dat$volume)), length = length(tran.dat$species))
-
 lines(x = x, y = (coef(mod3)[1] + coef(mod3)[2]*x), lwd = 2)
+polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.1))
 
 
 ```
@@ -501,6 +531,20 @@ mod4 <- lm(log10(tRNA) ~ log10(volume), data = tran.dat)
 #mod4 <- gls(log10(tRNA) ~ log10(volume), correlation = corBrownian(phy = tree.tran, form = ~species), data = tran.dat, method = "ML")
 #summary(mod4)
 
+
+SSX <- sum(round((log10(tran.dat$volume) - mean(log10(tran.dat$volume)))^2), 2)
+s2 <- var(log10(tran.dat$rRNA))
+n <- length(tran.dat$rRNA)
+x <- seq(min(log10(tran.dat$volume)), max(log10(tran.dat$volume)), length = length(tran.dat$species))
+m.x <- mean(round(log(tran.dat$volume), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(mod3)[1] + coef(mod3)[2]*x) + ic.s
+lower.i <- (coef(mod3)[1] + coef(mod3)[2]*x) + ic.i
+
 cols2 <- setNames(c("purple", "orange"), levels(as.factor(tran.dat$kingdom)))
 
 plot(log10(rRNA) ~ log10(volume), data = tran.dat, type = "n", pch = 16, las = 1, ylab = expression(log[10]~rRNA), xlab = expression(paste("Cell volume ", log[10], sep = " ")(mu*m^3)))
@@ -511,15 +555,30 @@ par(new = TRUE)
 
 plot(log10(rRNA) ~ log10(volume), data = tran.dat, type = "p", pch = 16, col = cols2[tran.dat$kingdom], bg = cols2[tran.dat$kingdom], las = 1, axes = FALSE, xaxt = "n", ylab = "", xlab = "")
 
-x <- seq(min(log10(tran.dat$volume)), max(log10(tran.dat$volume)), length = length(tran.dat$species))
-
 lines(x = x, y = (coef(mod3)[1] + coef(mod3)[2]*x), lwd = 2)
+polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.1))
+
 
 par(new = TRUE)
 
 plot(log10(tRNA) ~ log10(volume), data = tran.dat, type = "n", pch = 16, col = cols2[tran.dat$kingdom], bg = cols2[tran.dat$kingdom], las = 1, axes = FALSE, xaxt = "n", ylab = "", xlab = "")
 
+SSX <- sum(round((log10(tran.dat$volume) - mean(log10(tran.dat$volume)))^2), 2)
+s2 <- var(log10(tran.dat$tRNA))
+n <- length(tran.dat$tRNA)
+x <- seq(min(log10(tran.dat$volume)), max(log10(tran.dat$volume)), length = length(tran.dat$species))
+m.x <- mean(round(log(tran.dat$volume), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(mod4)[1] + coef(mod4)[2]*x) + ic.s
+lower.i <- (coef(mod4)[1] + coef(mod4)[2]*x) + ic.i
+
+
 lines(x = x, y = (coef(mod4)[1] + coef(mod4)[2]*x), lwd = 2, lty = 2)
+polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.1))
 
 legend("topleft", legend = paste("n = ", length(tran.dat$species), sep = " "), bty = "n")
 legend(x = -2.5, y = 2.1, legend = "tRNA genes", lty = 2, bty = "n")
@@ -537,6 +596,19 @@ How does temperature scale with size and growth?
 
 ---
 
+
+
+![](imgs/Kremer, et al., 2017.png)<br>
+
+<center>
+ 
+ Kremer et al., (2017)
+ 
+ </center>
+
+
+
+---
 
 ```{r, out.width = "60%"}
 
@@ -708,11 +780,11 @@ model6 <- lm(d1_up ~ log10(tmp.op), data = tmp.dat)
 
 ## IC
 
-SSX <- sum(round((tmp.dat$tmp.op - mean(tmp.dat$tmp.op))^2), 2)
+SSX <- sum(round((log10(tmp.dat$tmp.op) - mean(log10(tmp.dat$tmp.op)))^2), 2)
 s2 <- var(tmp.dat$d1_up)
 n <- length(tmp.dat$d1_up)
 x <- seq(min(log10(tmp.dat$tmp.op)), max(log10(tmp.dat$tmp.op)), length = 30)
-m.x <- mean(round(log(tmp.dat$tmp.op), 1))
+m.x <- mean(round(log10(tmp.dat$tmp.op), 1))
 se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
 is <- qt(0.975, df = n - 2)
 ii <- qt(0.025, df = n - 2)
@@ -732,7 +804,7 @@ cols <- setNames(c("purple", "orange"), levels(as.factor(tmp.dat$kingdom)))
 
 plot(d1_up ~ log10(tmp.op), data = tmp.dat, xlab = "", ylab = "", las = 1, pch = 21, col = cols[tmp.dat$kingdom], bg = cols[tmp.dat$kingdom], cex = 0.8, axes = FALSE)
 
-lines(x = x, y = (coef(model6)[1] + coef(model6)[2]*x), lwd = 2, col = "black")
+#lines(x = x, y = (coef(model6)[1] + coef(model6)[2]*x), lwd = 2, col = "black")
 #polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
 
 legend("topleft", legend = levels(as.factor((tmp.dat$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n")
@@ -757,11 +829,11 @@ model7 <- lm(log10(doubling_h) ~ log10(tmp.op), data = tmp.dat2)
 
 ## IC
 
-SSX <- sum(round((tmp.dat2$tmp.op - mean(tmp.dat2$tmp.op))^2), 2)
-s2 <- var(log(tmp.dat2$doubling_h))
-n <- length(tmp.dat2$doubling_h)
+SSX <- sum(round((log10(tmp.dat2$tmp.op) - mean(log10(tmp.dat2$tmp.op)))^2), 2)
+s2 <- var(log10(tmp.dat2$doubling_h))
+n <- length(log10(tmp.dat2$doubling_h))
 x <- seq(min(log10(tmp.dat2$tmp.op)), max(log10(tmp.dat2$tmp.op)), length = 30)
-m.x <- mean(round(log(tmp.dat2$tmp.op), 1))
+m.x <- mean(round(log10(tmp.dat2$tmp.op), 1))
 se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
 is <- qt(0.975, df = n - 2)
 ii <- qt(0.025, df = n - 2)
@@ -782,7 +854,7 @@ cols3 <- c("purple", "orange")[as.numeric(as.factor(tmp.dat2$kingdom))]
 plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.dat2, xlab = "", ylab = "", las = 1, pch = 21, col = cols3, bg = cols3, cex = 0.8, axes = FALSE)
 
 lines(x = x, y = (coef(model7)[1] + coef(model7)[2]*x), lty = 2, lwd = 2, col = "black")
-#polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
+polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
 
 legend("bottomleft", legend = levels(as.factor((tmp.dat2$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n")
 
