@@ -104,7 +104,7 @@ xaringanExtra::use_slide_tone()
 
 - Phylogenetic representation
 - Sample size
-- Size distribution
+- Size range
 
 --
 
@@ -167,6 +167,11 @@ tree <- read.tree("../spp.tree.nwk")
 
 data <- read.csv("../condensed_traits_NCBI.csv")
 
+
+vol <- read.csv("../cell_volume.csv")
+str(vol)
+head(vol)
+
 spp.d1_lo <- data[!is.na(data$d1_lo), ]
 spp.d1_up <- data[!is.na(data$d1_up), ]
 spp.doubling <- data[!is.na(data$doubling_h), ]
@@ -179,326 +184,110 @@ rRNA <- aggregate(spp.rRNA$rRNA16S_genes, by = list(spp.rRNA$species), mean, na.
 d1_up <- aggregate(spp.d1_up$d1_up, by = list(spp.d1_up$species), mean, na.action = na.rm)
 d1_lo <- aggregate(spp.d1_lo$d1_lo, by = list(spp.d1_lo$species), mean, na.action = na.rm)
 doubling <- aggregate(spp.doubling$doubling_h, by = list(spp.doubling$species), mean, na.action = na.rm)
+cell.vol <- aggregate(vol$volume, by = list(vol$species), mean)
+str(cell.vol)
 
 
+
+dim(tRNA)
 names(tRNA) <- c("species", "tRNA")
+dim(rRNA)
 names(rRNA) <- c("species", "rRNA")
+dim(d1_up)
 names(d1_up) <- c("species", "d1_up")
-
-obj <- rep()
-for(i in d1_up$species){
-    family <- unique(data$family[data$species == i])
-    obj <- c(obj, family)
-}
-
-d1_up$family <- obj
-head(d1_up)
-
+dim(d1_lo)
 names(d1_lo) <- c("species", "d1_lo")
+dim(doubling)
 names(doubling) <- c("species", "doubling_h")
-
+dim(cell.vol)
+names(cell.vol) <- c("species", "volume")
 
 
 ```
+
 
 ```{r, include = FALSE}
 
 
-size.growth <- merge(doubling, d1_up, by = "species")
+## Cell Volume
+
+
+doubling <- aggregate(spp.doubling$doubling_h, by = list(spp.doubling$species), mean, na.action = na.rm)
+cell.vol <- aggregate(vol$volume, by = list(vol$species), mean)
+str(cell.vol)
+
+dim(doubling)
+names(doubling) <- c("species", "doubling_h")
+dim(cell.vol)
+names(cell.vol) <- c("species", "volume")
 
 
 obj <- rep()
-for(i in size.growth$species){
-    kingdom <- unique(data$superkingdom[data$species == i])
+for(i in cell.vol$species){
+    kingdom <- data$superkingdom[data$species == i][1]
     obj <- c(obj, kingdom)
 }
 
-size.growth$kingdom <- obj
-head(size.growth)
-
-size.growth$species <- gsub("[[:punct:]]", "", size.growth$species)
-size.growth$species <- gsub(" ", "_", size.growth$species)
-rownames(size.growth) <- size.growth$species
-head(size.growth$species)
-head(size.growth)
-
-check <- name.check(tree, size.growth)
-rm_phy <- check$tree_not_data
-rm_dat <- check$data_not_tree
-tree.sg <- drop.tip(tree, rm_phy)
-
-sg.dat <- subset(size.growth, subset = size.growth$species %in% tree.sg$tip, select = names(size.growth))
-name.check(tree.sg, sg.dat)
-str(sg.dat)
-
-
-```
-
-
-.pull-left[
-
-
-```{r, out.width="100%"}
-
-col.br <- setNames(c("red", "purple"), c("Archaea", "Bacteria"))
-
-plotTree(tree.sg, type = "fan", ftype = "off", lwd = 3)
-
-par(new = TRUE, col = "transparent")
-
-painted <- paintSubTree(tree.sg, 253, "Archaea" ,"0")
-plotSimmap(painted, col.br, type = "fan", ftype = "off", lwd = 3)
-
-par(new = TRUE, col = "transparent")
-
-painted <- paintSubTree(tree.sg, 186, "Bacteria")
-
-plotSimmap(painted, col.br, type = "fan", ftype = "off", lwd = 3)
-
-par(new = TRUE, col = "black")
-
-legend("topleft", legend = c("Archaea", "Bacteria"), lwd = 3, col = col.br, bty = "n")
-
-
-```
-
-]
-
-
---
-
-
-
-.pull-right[
-
-
-
-```{r, echo = TRUE}
-
-
-## Number of species per kingdom
-
-
-head(sg.dat$species[sg.dat$kingdom == "Archaea"])
-length(sg.dat$species[sg.dat$kingdom == "Archaea"])
-
-head(sg.dat$species[sg.dat$kingdom == "Bacteria"])
-length(sg.dat$species[sg.dat$kingdom == "Bacteria"])
-
-
-```
-
-
-]
-
-
-
----
-
-
-.pull-left[
-
-
-```{r, out.width="100%"}
-
-
-col.br <- setNames(c("red", "purple"), c("Archaea", "Bacteria"))
-
-plotTree(tree.sg, type = "fan", ftype = "off", lwd = 3)
-
-par(new = TRUE, col = "transparent")
-
-painted <- paintSubTree(tree.sg, 253, "Archaea" ,"0")
-plotSimmap(painted, col.br, type = "fan", ftype = "off", lwd = 3)
-
-par(new = TRUE, col = "transparent")
-
-painted <- paintSubTree(tree.sg, 186, "Bacteria")
-
-plotSimmap(painted, col.br, type = "fan", ftype = "off", lwd = 3)
-
-par(new = TRUE, col = "black")
-
-legend("topleft", legend = c("Archaea", "Bacteria"), lwd = 3, col = col.br, bty = "n")
-
-```
-
-]
-
-
-
-.pull-right[
-
-
-
-```{r, echo = TRUE}
-
-
-## Size range
-
-range(sg.dat$d1_up)
-
-
-
-```
-
-
-]
-
-
----
-
-
-
-.pull-left[
-
-
-```{r}
-
-obj <- rep()
-for(i in d1_up$species){
-    kingdom <- unique(data$superkingdom[data$species == i])
-    obj <- c(obj, kingdom)
-}
-
-d1_up$kingdom <- obj
-
-d1_up$species <- gsub("[[:punct:]]", "", d1_up$species)
-d1_up$species <- gsub(" ", "_", d1_up$species)
-rownames(d1_up) <- d1_up$species
-
-
-size <- lm(d1_up ~ kingdom, data = d1_up)
-
-## Basic boxplot
-
-vioplot(d1_up ~ kingdom, data = d1_up, border = NA, method = "jitter", side = "right", ylab = expression(paste("Cell size")~mu*m~(log[10])), xlab = "Kingdom", col = "white", las = 1)
-
-grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
-
-par(new = TRUE)
-
-vioplot(d1_up ~ kingdom, data = d1_up, border = NA, method = "jitter", side = "right", ylab = "", xlab = "", col = c(alpha("red", 0.2), alpha("purple", 0.2)), las = 1)
-
-segments(x0 = 1, y0 = mean(d1_up$d1_up[d1_up$kingdom == "Archaea"]), x1 = 1.311, y1 = mean(d1_up$d1_up[d1_up$kingdom == "Archaea"]), lwd = 2, lty = 2, col = "blue")
-text(x = 1.4, y = mean(d1_up$d1_up[d1_up$kingdom == "Archaea"]), expression(mu))
-
-segments(x0 = 2, y0 = mean(d1_up$d1_up[d1_up$kingdom == "Bacteria"]), x1 = 2.4, y1 = mean(d1_up$d1_up[d1_up$kingdom == "Bacteria"]), lwd = 2, lty = 2, col = "blue")
-text(x = 2.45, y = mean(d1_up$d1_up[d1_up$kingdom == "Bacteria"]), expression(mu))
-
-text(x = 0.6, y = 9.8, paste("n =", length(d1_up$species), sep = " "))
-
-
-```
-
-]
-
---
-
-
-.pull-right[
-
-
-
-```{r}
-
-obj <- rep()
-for(i in doubling$species){
-    kingdom <- unique(data$superkingdom[data$species == i])
-    obj <- c(obj, kingdom)
-}
-
-doubling$kingdom <- obj
-
+cell.vol$kingdom <- obj
+cell.vol$kingdom[11] <- "Bacteria"
 
 doubling$species <- gsub("[[:punct:]]", "", doubling$species)
 doubling$species <- gsub(" ", "_", doubling$species)
-rownames(doubling) <- doubling$species
+cell.vol$species <- gsub(" ", "_", cell.vol$species)
 
+v.dat <- merge(cell.vol, doubling, by = "species")
+v.dat <- v.dat[!v.dat$species == "Sphingopyxis_alaskensis", ] ## possible outlier
+v.dat <- v.dat[!v.dat$species == "Anabaena_cylindrica", ] ## possible outlier
+v.dat <- v.dat[!v.dat$species == "Haloferax_volcanii", ] ## possible outlier
+v.dat <- v.dat[!v.dat$species == "Azotobacter_chroococcum", ] ## possible outlier
+rownames(v.dat) <- v.dat$species
 
-growth <- lm(doubling_h ~ kingdom, data = doubling)
+vol.tree <- read.tree("vol.spp.nwk")
+vol.tree <- force.ultrametric(vol.tree)
 
+check <- name.check(vol.tree, v.dat)
+rm_phy <- check$tree_not_data
+rm_dat <- check$data_not_tree
+tree.vol <- drop.tip(vol.tree, rm_phy)
 
-## Basic boxplot
-
-vioplot(log(doubling_h) ~ kingdom, data = doubling, border = NA, method = "jitter", side = "right", ylab = "Doubling h (log)", xlab = "Kingdom", col = "white", las = 1)
-
-grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
-
-par(new = TRUE)
-
-vioplot(log(doubling_h) ~ kingdom, data = doubling, border = NA, method = "jitter", side = "right", ylab = "", xlab = "", col = c(alpha("red", 0.2), alpha("purple", 0.2)), las = 1)
-
-segments(x0 = 1, y0 = mean(log(doubling$doubling_h)[doubling$kingdom == "Archaea"]), x1 = 1.4, y1 = mean(log(doubling$doubling_h)[doubling$kingdom == "Archaea"]), lwd = 2, lty = 2, col = "blue")
-text(x = 1.45, y = mean(log(doubling$doubling_h)[doubling$kingdom == "Archaea"]), expression(mu))
-
-segments(x0 = 2, y0 = mean(log(doubling$doubling_h)[doubling$kingdom == "Bacteria"]), x1 = 2.39, y1 = mean(log(doubling$doubling_h)[doubling$kingdom == "Bacteria"]), lwd = 2, lty = 2, col = "blue")
-text(x = 2.45, y = mean(log(doubling$doubling_h)[doubling$kingdom == "Bacteria"]), expression(mu))
-
-text(x = 0.6, y = 5.8, paste("n =", length(doubling$species), sep = " "))
-
+vol.dat <- subset(v.dat, subset = v.dat$species %in% tree.vol$tip, select = names(v.dat))
+name.check(tree.vol, vol.dat)
+str(vol.dat)
 
 ```
-
-
-]
-
-
----
-
 
 .pull-left[
 
-
-
 ```{r}
 
-
-model1 <- gls(log(doubling_h) ~ d1_up, correlation = corBrownian(phy = tree.sg, form = ~species), data = sg.dat, method = "ML")
-
-
-model2 <- gls(log(doubling_h) ~ d1_up*kingdom, correlation = corBrownian(phy = tree.sg, form = ~species), data = sg.dat, method = "ML")
+## Growth and volume
 
 
+#plotTree(tree.vol, ftype = "i", lwd = 2, mar = c(1, 1, 1, 3))
+#nodelabels(cex = 0.5, bg = "white")
+#vol.dat
 
-## IC
+col.br <- setNames(c("purple", "orange"), c("Archaea", "Bacteria"))
 
-SSX <- sum(round((sg.dat$d1_up - mean(sg.dat$d1_up))^2), 2)
-s2 <- var(log(sg.dat$doubling_h))
-n <- length(sg.dat$doubling_h)
-x <- seq(min(sg.dat$d1_up), max(sg.dat$d1_up), length = 30)
-m.x <- mean(round(sg.dat$d1_up, 1))
-se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
-is <- qt(0.975, df = n - 2)
-ii <- qt(0.025, df = n - 2)
-ic.s <- se*is
-ic.i <- se*ii
-upper.i <- (coef(model1)[1] + coef(model1)[2]*x) + ic.s
-lower.i <- (coef(model1)[1] + coef(model1)[2]*x) + ic.i
+plotTree(tree.vol, ftype = "i", lwd = 3, mar = c(1, 1, 1, 0.3))
 
+par(new = TRUE, col = "transparent")
 
+painted <- paintSubTree(tree.vol, 52, "Archaea" ,"0")
+plotSimmap(painted, col.br, ftype = "i", lwd = 3, mar = c(1, 1, 1, 0.3))
 
+par(new = TRUE, col = "transparent")
 
-cols3 <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(sg.dat$kingdom))]
+painted <- paintSubTree(tree.vol, 31, "Bacteria")
 
-plot(log(doubling_h) ~ d1_up, data = sg.dat, xlab = expression(paste("Cell diameter")~mu*m~(log[10])), ylab = "Doubling h (log)", las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n")
+plotSimmap(painted, col.br, ftype = "i", lwd = 3, mar = c(1, 1, 1, 0.3))
 
-grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+par(new = TRUE, col = "black")
 
-par(new = TRUE)
-
-plot(log(doubling_h) ~ d1_up, data = sg.dat, xlab = "", ylab = "", las = 1, pch = 21, col = cols3, bg = cols3, cex = 0.8, axes = FALSE)
-
-
-lines(x = x, y = (coef(model1)[1] + coef(model1)[2]*x), lwd = 2, col = "black")
-polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
-
-
-legend("topright", legend = levels(as.factor((sg.dat$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+legend("bottomleft", legend = c("Archaea", "Bacteria"), lwd = 3, col = col.br, bty = "n")
 
 
 ```
-
 
 ]
 
@@ -506,127 +295,50 @@ legend("topright", legend = levels(as.factor((sg.dat$kingdom))), pch = 16, col =
 
 .pull-right[
 
-<br><br><br><br>
-
-```{r, echo = TRUE}
-
-model1 <- gls(log(doubling_h) ~ d1_up, correlation = corBrownian(phy = tree.sg, form = ~species), data = sg.dat, method = "ML")
-
-kable(as.data.frame(summary(model1)$tTable), digits = 3, row.names = TRUE) %>%
-  kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
-
-
-```
-
-
-
-
-]
-
-
----
-
-
-
-```{r, include = FALSE}
-
-
-d1_up <- aggregate(spp.d1_up$d1_up, by = list(spp.d1_up$species), mean, na.action = na.rm)
-
-dim(d1_up)
-names(d1_up) <- c("species", "d1_up")
-
-
-mrg1 <- merge(tRNA, rRNA, by = "species")
-class(mrg1)
-str(mrg1)
-
-mrg.data <- merge(mrg1, d1_up, by = "species")
-str(mrg.data)
-
-obj <- rep()
-for(i in mrg.data$species){
-    kingdom <- unique(data$superkingdom[data$species == i])
-    obj <- c(obj, kingdom)
-}
-
-mrg.data$kingdom <- obj
-mrg.data$species <- gsub("[[:punct:]]", "", mrg.data$species)
-mrg.data$species <- gsub(" ", "_", mrg.data$species)
-rownames(mrg.data) <- mrg.data$species
-length(mrg.data$species)
-head(mrg.data)
-
-check <- name.check(tree, mrg.data)
-rm_phy <- check$tree_not_data
-rm_dat <- check$data_not_tree
-ctree <- drop.tip(tree, rm_phy)
-
-mrg.dat <- subset(mrg.data, subset = mrg.data$species %in% ctree$tip, select = names(mrg.data))
-name.check(ctree, mrg.dat)
-str(mrg.dat)
-
-model3 <- gls(rRNA ~ d1_up, correlation = corBrownian(phy = ctree, form = ~species), data = mrg.dat, method = "ML")
-summary(model3)
-
-model4 <- gls(rRNA ~ d1_up*log(tRNA), correlation = corBrownian(phy = ctree, form = ~species), data = mrg.dat, method = "ML")
-summary(model4)
-
-model5 <- gls(log(tRNA) ~ d1_up, correlation = corBrownian(phy = ctree, form = ~species), data = mrg.dat, method = "ML")
-summary(model5)
-
-```
-
-
-.pull-left[
-
-
 
 ```{r}
 
+mod <- lm(log10(doubling_h) ~ log10(volume), data = v.dat)
+#summary(mod)
 
+pg.mod <- gls(log10(doubling_h) ~ log10(volume), correlation = corBrownian(phy = tree.vol, form = ~species), data = vol.dat, method = "ML")
+#summary(pg.mod)
 
-colors <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(mrg.dat$kingdom))]
+cols <- setNames(c("purple", "orange"), levels(as.factor(vol.dat$kingdom)))
+vol.dat$kingdom <- as.factor(vol.dat$kingdom)
 
-## Plotting interaction
+#plot(log10(doubling_h) ~ log10(volume), data = v.dat, type = "p", pch = 16, las = 1, ylab = expression(paste("Doubling")~log[10]*(h)), xlab = expression(paste("Cell volume")~log[10]*(mu*m^3)), type = "n")
 
-par(mar = c(5, 4, 1.5, 3))
-
-plot(rRNA ~ d1_up, data = mrg.dat, las = 1, pch = 21, col = colors, bg = colors, cex = 0.8, type = "n", xlab = expression(paste("Cell size")~mu*m~(log[10])), ylab = "rRNA genes")
+plot(log10(doubling_h) ~ log10(volume), data = vol.dat, type = "n", pch = 16, las = 1, ylab = expression(paste("Doubling ", log[10], sep = " ")*(h)), xlab = expression(paste("Cell volume ", log[10], sep = " ")(mu*m^3)))
 
 grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
 
 par(new = TRUE)
 
-plot(rRNA ~ d1_up, data = mrg.dat, las = 1, pch = 21, col = colors, bg = colors, cex = 0.8, xlab = "", ylab = "", axes = FALSE)
+plot(log10(doubling_h) ~ log10(volume), data = vol.dat, type = "p", pch = 16, col = cols[vol.dat$kingdom], bg = cols[vol.dat$kingdom], las = 1, ylab = "", xlab = "", axes = FALSE)
 
+x <- seq(min(log10(vol.dat$volume)), max(log10(vol.dat$volume)), length = length(vol.dat$species))
 
-## rRNA
+lines(x, y = (coef(pg.mod)[1] + coef(pg.mod)[2]*x), lwd = 2)
 
-
-SSX <- sum(round((mrg.dat$d1_up - mean(mrg.dat$d1_up))^2), 2)
-s2 <- var(mrg.dat$rRNA)
-n <- length(mrg.dat$rRNA)
-x <- seq(min(mrg.dat$d1_up), max(mrg.dat$d1_up), length = 30)
-m.x <- mean(round(mrg.dat$d1_up, 1))
-se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
-is <- qt(0.975, df = n - 2)
-ii <- qt(0.025, df = n - 2)
-ic.s <- se*is
-ic.i <- se*ii
-upper.i <- (coef(model3)[1] + coef(model3)[2]*x) + ic.s
-lower.i <- (coef(model3)[1] + coef(model3)[2]*x) + ic.i
-
-
-lines(x = x, y = (coef(model3)[1] + coef(model3)[2]*x), lwd = 2, col = "black")
-polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.2))
-
+legend("topright", legend = paste("n =", length(vol.dat$species), sep = " "), bty = "n")
+legend("bottomleft", legend = unique(vol.dat$kingdom), pch = 16, col = cols, bg = cols, bty = "n")
 
 ```
 
 ]
 
 
+```{r, include = FALSE}
+
+layout(matrix(c(1, 1, 2, 2,
+                1, 1, 2, 2,
+                3, 3, 4, 4,
+                3, 3, 4, 4), nrow = 4, ncol = 4, byrow = TRUE))
+
+plot(mod, las = 1)
+
+```
 
 ---
 class: center, middle
@@ -637,173 +349,184 @@ background-size: cover
 # Translation machinery
 
 
-
-
 ---
 
-.pull-left[
 
+```{r, out.width = "60%"}
 
-```{r}
+## Translation
 
+tRNA <- aggregate(spp.tRNA$tRNA_genes, by = list(spp.tRNA$species), mean, na.action = na.rm)
+rRNA <- aggregate(spp.rRNA$rRNA16S_genes, by = list(spp.rRNA$species), mean, na.action = na.rm)
+cell.vol <- aggregate(vol$volume, by = list(vol$species), mean)
 
-colors <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(mrg.dat$kingdom))]
+#dim(tRNA)
+names(tRNA) <- c("species", "tRNA")
+#dim(rRNA)
+names(rRNA) <- c("species", "rRNA")
+#dim(cell.vol)
+names(cell.vol) <- c("species", "volume")
 
-## Plotting interaction
+genes <- merge(rRNA, tRNA, by = "species")
+tran <- merge(genes, cell.vol, by = "species")
 
-par(mar = c(5, 4, 1.5, 3))
+obj <- rep()
+for(i in tran$species){
+    kingdom <- unique(data$superkingdom[data$species == i])
+    obj <- c(obj, kingdom)
+}
 
-plot(rRNA ~ d1_up, data = mrg.dat, las = 1, pch = 21, col = colors, bg = colors, cex = 0.8, type = "n", xlab = expression(paste("Cell size")~mu*m~(log[10])), ylab = "rRNA genes")
+tran$kingdom <- obj
+#head(tran)
+
+tran$species <- gsub("[[:punct:]]", "", tran$species)
+tran$species <- gsub(" ", "_", tran$species)
+#head(tran)
+
+tran <- tran[!tran$species == "Sphingopyxis_alaskensis", ] ## possible outlier
+rownames(tran) <- tran$species
+
+tran.tree <- read.tree("tran.spp.nwk")
+#tran.tree <- force.ultrametric(tran.tree)
+
+check <- name.check(tran.tree, tran)
+rm_phy <- check$tree_not_data
+rm_dat <- check$data_not_tree
+tree.tran <- drop.tip(tran.tree, rm_phy)
+
+tran.dat <- subset(tran, subset = tran$species %in% tree.tran$tip, select = names(tran))
+#name.check(tree.tran, tran.dat)
+#str(tran.dat)
+
+##mod2 <- lm(log10(rRNA) ~ log10(volume)*log10(tRNA), data = tran.dat)
+#summary(mod2)
+
+mod3 <- lm(log10(rRNA) ~ log10(volume), data = tran.dat)
+#summary(mod3)
+
+mod4 <- lm(log10(tRNA) ~ log10(volume), data = tran.dat)
+#summary(mod4)
+
+#mod2 <- gls(log10(rRNA) ~ log10(volume)*log10(tRNA), correlation = corBrownian(phy = tree.tran, form = ~species), data = tran.dat, method = "ML")
+#summary(mod2)
+
+#mod3 <- gls(log10(rRNA) ~ log10(volume), correlation = corBrownian(phy = tree.tran, form = ~species), data = tran.dat, method = "ML")
+#summary(mod3)
+
+#mod4 <- gls(log10(tRNA) ~ log10(volume), correlation = corBrownian(phy = tree.tran, form = ~species), data = tran.dat, method = "ML")
+#summary(mod4)
+
+cols2 <- setNames(c("purple", "orange"), levels(as.factor(tran.dat$kingdom)))
+
+plot(log10(rRNA) ~ log10(volume), data = tran.dat, type = "n", pch = 16, las = 1, ylab = expression(log[10]~rRNA), xlab = expression(paste("Cell volume ", log[10], sep = " ")(mu*m^3)))
 
 grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
 
 par(new = TRUE)
 
-plot(rRNA ~ d1_up, data = mrg.dat, las = 1, pch = 21, col = colors, bg = colors, cex = 0.8, xlab = "", ylab = "", axes = FALSE)
+plot(log10(rRNA) ~ log10(volume), data = tran.dat, type = "p", pch = 16, col = cols2[tran.dat$kingdom], bg = cols2[tran.dat$kingdom], las = 1, axes = FALSE, xaxt = "n", ylab = "", xlab = "")
 
-legend(x = -0.1, y = 14.2, legend = "tRNA genes", lty = 2, lwd = 2, bty = "n")
+x <- seq(min(log10(tran.dat$volume)), max(log10(tran.dat$volume)), length = length(tran.dat$species))
 
-## rRNA
-
-
-SSX <- sum(round((mrg.dat$d1_up - mean(mrg.dat$d1_up))^2), 2)
-s2 <- var(mrg.dat$rRNA)
-n <- length(mrg.dat$rRNA)
-x <- seq(min(mrg.dat$d1_up), max(mrg.dat$d1_up), length = 30)
-m.x <- mean(round(mrg.dat$d1_up, 1))
-se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
-is <- qt(0.975, df = n - 2)
-ii <- qt(0.025, df = n - 2)
-ic.s <- se*is
-ic.i <- se*ii
-upper.i <- (coef(model3)[1] + coef(model3)[2]*x) + ic.s
-lower.i <- (coef(model3)[1] + coef(model3)[2]*x) + ic.i
-
-
-lines(x = x, y = (coef(model3)[1] + coef(model3)[2]*x), lwd = 2, col = "black")
-polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.2))
-
-
-
-
-## tRNA
-
-
-par(new = TRUE)
-
-plot(log(tRNA) ~ d1_up, data = mrg.dat, las = 1, pch = 21, col = colors, bg = colors, cex = 0.8, xlab = "", ylab = "", axes = FALSE, type = "n")
-
-axis(side = 4, at = pretty(range(log(mrg.dat$tRNA))), las = 1)
-mtext("tRNA genes (log)", side = 4, line = 2)
-
-
-SSX <- sum(round((mrg.dat$d1_up - mean(mrg.dat$d1_up))^2), 2)
-s2 <- var(log(mrg.dat$tRNA))
-n <- length(mrg.dat$tRNA)
-x <- seq(min(mrg.dat$d1_up), max(mrg.dat$d1_up), length = 30)
-m.x <- mean(round(mrg.dat$d1_up, 1))
-se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
-is <- qt(0.975, df = n - 2)
-ii <- qt(0.025, df = n - 2)
-ic.s <- se*is
-ic.i <- se*ii
-upper.i <- (coef(model5)[1] + coef(model5)[2]*x) + ic.s
-lower.i <- (coef(model5)[1] + coef(model5)[2]*x) + ic.i
-
-lines(x = x, y = (coef(model5)[1] + coef(model5)[2]*x), lty = 2, lwd = 2, col = "black")
-polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.2))
-
-legend("topleft", legend = levels(as.factor((mrg.dat$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+lines(x = x, y = (coef(mod3)[1] + coef(mod3)[2]*x), lwd = 2)
 
 
 ```
-
-]
-
-
---
-
-
-.pull-right[
-
-
-<br>
-
-```{r, echo = TRUE}
-
-
-model3 <- gls(rRNA ~ d1_up, correlation = corBrownian(phy = ctree, form = ~species), data = mrg.dat, method = "ML")
-
-kable(as.data.frame(summary(model3)$tTable), digits = 3, row.names = TRUE) %>%
-  kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
-
-model5 <- gls(log(tRNA) ~ d1_up, correlation = corBrownian(phy = ctree, form = ~species), data = mrg.dat, method = "ML")
-
-kable(as.data.frame(summary(model5)$tTable), digits = 3, row.names = TRUE) %>%
-  kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
-
-
-```
-
-
-]
-
 
 
 ---
 
 
-```{r, out.width="60%"}
+```{r, out.width = "60%"}
 
+## Translation
 
-col.br <- setNames(c("red", "purple"), c("Archaea", "Bacteria"))
+tRNA <- aggregate(spp.tRNA$tRNA_genes, by = list(spp.tRNA$species), mean, na.action = na.rm)
+rRNA <- aggregate(spp.rRNA$rRNA16S_genes, by = list(spp.rRNA$species), mean, na.action = na.rm)
+cell.vol <- aggregate(vol$volume, by = list(vol$species), mean)
 
-plotTree(ctree, ftype = "off", lwd = 3, mar = c(2, 0.1, 1, 5))
+#dim(tRNA)
+names(tRNA) <- c("species", "tRNA")
+#dim(rRNA)
+names(rRNA) <- c("species", "rRNA")
+#dim(cell.vol)
+names(cell.vol) <- c("species", "volume")
 
-par(new = TRUE, col = "transparent")
+genes <- merge(rRNA, tRNA, by = "species")
+tran <- merge(genes, cell.vol, by = "species")
 
-painted <- paintSubTree(ctree, 380, "Archaea" ,"0")
-plotSimmap(painted, col.br, ftype = "off", lwd = 3, mar = c(2, 0.1, 1, 5))
+obj <- rep()
+for(i in tran$species){
+    kingdom <- unique(data$superkingdom[data$species == i])
+    obj <- c(obj, kingdom)
+}
 
-par(new = TRUE, col = "transparent")
+tran$kingdom <- obj
+#head(tran)
 
-painted <- paintSubTree(ctree, 220, "Bacteria")
-plotSimmap(painted, col.br, ftype = "off", lwd = 3, mar = c(2, 0.1, 1, 5))
+tran$species <- gsub("[[:punct:]]", "", tran$species)
+tran$species <- gsub(" ", "_", tran$species)
+#head(tran)
 
-par(new = TRUE, col = "black")
+tran <- tran[!tran$species == "Sphingopyxis_alaskensis", ] ## possible outlier
+rownames(tran) <- tran$species
 
-legend("bottomleft", legend = c("Archaea", "Bacteria"), lwd = 3, col = col.br, bty = "n")
+tran.tree <- read.tree("tran.spp.nwk")
+#tran.tree <- force.ultrametric(tran.tree)
 
-rRNA <- setNames(mrg.dat$rRNA, rownames(mrg.dat))
-tRNA <- setNames(log(mrg.dat$tRNA), rownames(mrg.dat))
+check <- name.check(tran.tree, tran)
+rm_phy <- check$tree_not_data
+rm_dat <- check$data_not_tree
+tree.tran <- drop.tip(tran.tree, rm_phy)
+
+tran.dat <- subset(tran, subset = tran$species %in% tree.tran$tip, select = names(tran))
+#name.check(tree.tran, tran.dat)
+#str(tran.dat)
+
+##mod2 <- lm(log10(rRNA) ~ log10(volume)*log10(tRNA), data = tran.dat)
+#summary(mod2)
+
+mod3 <- lm(log10(rRNA) ~ log10(volume), data = tran.dat)
+#summary(mod3)
+
+mod4 <- lm(log10(tRNA) ~ log10(volume), data = tran.dat)
+#summary(mod4)
+
+#mod2 <- gls(log10(rRNA) ~ log10(volume)*log10(tRNA), correlation = corBrownian(phy = tree.tran, form = ~species), data = tran.dat, method = "ML")
+#summary(mod2)
+
+#mod3 <- gls(log10(rRNA) ~ log10(volume), correlation = corBrownian(phy = tree.tran, form = ~species), data = tran.dat, method = "ML")
+#summary(mod3)
+
+#mod4 <- gls(log10(tRNA) ~ log10(volume), correlation = corBrownian(phy = tree.tran, form = ~species), data = tran.dat, method = "ML")
+#summary(mod4)
+
+cols2 <- setNames(c("purple", "orange"), levels(as.factor(tran.dat$kingdom)))
+
+plot(log10(rRNA) ~ log10(volume), data = tran.dat, type = "n", pch = 16, las = 1, ylab = expression(log[10]~rRNA), xlab = expression(paste("Cell volume ", log[10], sep = " ")(mu*m^3)))
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
 
 par(new = TRUE)
 
-par(mar = c(2.1, 29.7, 3, 3))
+plot(log10(rRNA) ~ log10(volume), data = tran.dat, type = "p", pch = 16, col = cols2[tran.dat$kingdom], bg = cols2[tran.dat$kingdom], las = 1, axes = FALSE, xaxt = "n", ylab = "", xlab = "")
 
-barplot(rRNA[ctree$tip.label], border = TRUE, horiz = TRUE, width = 1.065, space = 0,
-        ylim = c(1, length(ctree$tip.label))-0.5, names = "", las = 2, cex.axis = 0.5, axes = FALSE)
+x <- seq(min(log10(tran.dat$volume)), max(log10(tran.dat$volume)), length = length(tran.dat$species))
 
-axis(1, at = round(seq(min(rRNA), max(rRNA), length = 3), 1), labels = FALSE)
-text(round(seq(min(rRNA), max(rRNA), length = 3), 2), par("usr")[3] - 0.2, labels = round(seq(min(rRNA), max(rRNA), length = 3), 1), srt = 50, pos = 1, xpd = TRUE, cex = 0.5, offset = 1)
-mtext(" rRNA genes", side = 1, line = 1, cex = 0.5, font = 2)
-
+lines(x = x, y = (coef(mod3)[1] + coef(mod3)[2]*x), lwd = 2)
 
 par(new = TRUE)
-par(mar = c(2.1, 32.8, 3, 0.5))
 
-barplot(tRNA[ctree$tip.label], border = TRUE, horiz = TRUE, width = 1.065, space = 0,
-        ylim = c(1, length(ctree$tip.label))-0.5, names = "", las = 2, cex.axis = 0.5, axes = FALSE)
+plot(log10(tRNA) ~ log10(volume), data = tran.dat, type = "n", pch = 16, col = cols2[tran.dat$kingdom], bg = cols2[tran.dat$kingdom], las = 1, axes = FALSE, xaxt = "n", ylab = "", xlab = "")
 
-axis(1, at = seq(0, 4.8, length = 3), labels = FALSE)
-text(seq(0, 4.8, length = 3), par("usr")[3] - 0.2, labels = round(seq(min(tRNA), max(tRNA), length = 3), 1), srt = 50, pos = 1, xpd = TRUE, cex = 0.5, offset = 1)
-mtext("tRNA genes", side = 1, line = 1, cex = 0.5, font = 2)
+lines(x = x, y = (coef(mod4)[1] + coef(mod4)[2]*x), lwd = 2, lty = 2)
 
+legend("topleft", legend = paste("n = ", length(tran.dat$species), sep = " "), bty = "n")
+legend(x = -2.5, y = 2.1, legend = "tRNA genes", lty = 2, bty = "n")
+legend("bottomright", legend = levels(as.factor(tran.dat$kingdom)), pch = 16, col = cols2, bg = cols2, bty = "n") 
 
 
 ```
-
-
 
 ---
 class: center, middle
@@ -812,8 +535,45 @@ background-size: cover
 
 How does temperature scale with size and growth?
 
+---
+
+
+```{r, out.width = "60%"}
+
+## Relationship between diameter and volume
+
+d1_up <- aggregate(spp.d1_up$d1_up, by = list(spp.d1_up$species), mean, na.action = na.rm)
+cell.vol <- aggregate(vol$volume, by = list(vol$species), mean)
+
+#dim(d1_up)
+names(d1_up) <- c("species", "d1_up")
+#dim(cell.vol)
+names(cell.vol) <- c("species", "volume")
+
+
+d1_up$species <- gsub("[[:punct:]]", "", d1_up$species)
+d1_up$species <- gsub(" ", "_", d1_up$species)
+cell.vol$species <- gsub(" ", "_", cell.vol$species)
+
+di.vol <- merge(cell.vol, d1_up, by = "species")
+
+#cor(log10(di.vol$volume), di.vol$d1_up, method = c("pearson"))
+
+plot(log10(volume) ~ d1_up, data = di.vol, pch = 16, las = 1, ylab = expression(paste("Cell volume ", log[10], sep = " ")(mu*m^3)), xlab = expression(paste("Cell diameter ", log[10], sep = " ")(mu*m)), mgp = c(2.6, 1, 0))
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+abline(lm(log10(di.vol$volume) ~ di.vol$d1_up), lwd = 2)
+legend(x = 0.1, y = 2.3, legend = expression(R^2), bty = "n")
+legend(x = 0.2, y = 2.3, legend = paste("=", round((cor(log(di.vol$volume), di.vol$d1_up, method = "pearson"))^2, 2), sep = " "), bty = "n")
+
+
+
+```
+
 
 ---
+
 
 
 ```{r, include = FALSE}
@@ -822,28 +582,37 @@ How does temperature scale with size and growth?
 
 spp.d1_up <- data[!is.na(data$d1_up), ]
 spp.temp.op <- data[!is.na(data$optimum_tmp), ]
+spp.growth_temp <- data[!is.na(data$growth_tmp), ]
 spp.doubling <- data[!is.na(data$doubling_h), ]
 
 d1_up <- aggregate(spp.d1_up$d1_up, by = list(spp.d1_up$species), mean, na.action = na.rm)
 doubling <- aggregate(spp.doubling$doubling_h, by = list(spp.doubling$species), mean, na.action = na.rm)
 temp.op <- aggregate(spp.temp.op$optimum_tmp, by = list(spp.temp.op$species), mean, na.action = na.rm)
+growth_temp <- aggregate(spp.growth_temp$growth_tmp, by = list(spp.growth_temp$species), mean, na.action = na.rm)
 
+dim(doubling)
 dim(doubling)
 names(doubling) <- c("species", "doubling_h")
 dim(d1_up)
 names(d1_up) <- c("species", "d1_up")
 dim(temp.op)
 names(temp.op) <- c("species", "tmp.op")
+dim(growth_temp)
+names(growth_temp) <- c("species", "growth_tmp")
 
-mrg.tmp.op2 <- merge(temp.op, d1_up, by = "species")
+
+mrg.tmp <- merge(temp.op, growth_temp, by = "species")
+str(mrg.tmp)
+
+
+mrg.tmp <- mrg.tmp[mrg.tmp$growth_tmp == mrg.tmp$tmp.op, ]
+
+mrg.tmp.op2 <- merge(mrg.tmp, d1_up, by = "species")
 str(mrg.tmp.op2)
-head(mrg.tmp.op2)
-dim(mrg.tmp.op2)
+
 
 mrg.tmp.op3 <- merge(mrg.tmp.op2, doubling, by = "species")
 str(mrg.tmp.op3)
-head(mrg.tmp.op3)
-dim(mrg.tmp.op3)
 
 
 obj <- rep()
@@ -854,14 +623,11 @@ for(i in mrg.tmp.op2$species){
 
 mrg.tmp.op2$kingdom <- obj
 head(mrg.tmp.op2)
-str(mrg.tmp.op2)
-
 
 mrg.tmp.op2$species <- gsub("[[:punct:]]", "", mrg.tmp.op2$species)
 mrg.tmp.op2$species <- gsub(" ", "_", mrg.tmp.op2$species)
 rownames(mrg.tmp.op2) <- mrg.tmp.op2$species
 head(mrg.tmp.op2$species)
-head(mrg.tmp.op2)
 
 check <- name.check(tree, mrg.tmp.op2)
 rm_phy <- check$tree_not_data
@@ -870,10 +636,6 @@ tree.tmp <- drop.tip(tree, rm_phy)
 
 tmp.dat <- subset(mrg.tmp.op2, subset = mrg.tmp.op2$species %in% tree.tmp$tip, select = names(mrg.tmp.op2))
 name.check(tree.tmp, tmp.dat)
-str(tmp.dat)
-head(tmp.dat)
-
-
 
 obj <- rep()
 for(i in mrg.tmp.op3$species){
@@ -883,13 +645,11 @@ for(i in mrg.tmp.op3$species){
 
 mrg.tmp.op3$kingdom <- obj
 head(mrg.tmp.op3)
-str(mrg.tmp.op3)
 
 mrg.tmp.op3$species <- gsub("[[:punct:]]", "", mrg.tmp.op3$species)
 mrg.tmp.op3$species <- gsub(" ", "_", mrg.tmp.op3$species)
 rownames(mrg.tmp.op3) <- mrg.tmp.op3$species
 head(mrg.tmp.op3$species)
-head(mrg.tmp.op3)
 
 check <- name.check(tree, mrg.tmp.op3)
 rm_phy <- check$tree_not_data
@@ -898,18 +658,52 @@ tree.tmp2 <- drop.tip(tree, rm_phy)
 
 tmp.dat2 <- subset(mrg.tmp.op3, subset = mrg.tmp.op3$species %in% tree.tmp2$tip, select = names(mrg.tmp.op3))
 name.check(tree.tmp2, tmp.dat2)
-str(tmp.dat2)
-head(tmp.dat2)
+
 
 
 ```
 
 
-```{r, include = FALSE}
+```{r, out.width = "60%", include = FALSE}
+
+
+tmp.op <- setNames(log(tmp.dat$tmp.op), rownames(tmp.dat))
+
+fit <- fastAnc(tree.tmp, tmp.op, vars = TRUE, CI = TRUE)
+
+obj <- contMap(tree.tmp, tmp.op, plot = FALSE)
+
+plotTree(tree.tmp, ftype = "off", lwd = 2, mar = c(3.5, 1.5, 1.5, 0.5), plot = FALSE)
+
+cladelabels(tree.tmp, text = c("Archaea", "Bacteria"), node = c(518, 279))
+
+par(new = TRUE)
+
+plot(obj, ftype = "off", legend = FALSE, ylim = c(1-0.09*(Ntip(obj$tree)-1), Ntip(obj$tree)), lwd = 2, mar = c(1, 1.5, 1.5, 1.5))
+
+add.color.bar(1200, obj$cols, title = expression(paste("Optimum temperature ")~log[10]), lims = obj$lims, digits = 3, prompt = FALSE, x = 0, y = 1-0.02*(Ntip(obj$tree)-1), lwd = 4, fsize = 0.6, subtitle = "")
+
+
+axisPhylo(1, line = -2.3)
+mtext("Time (mya)", side = 1)
+
+
+```
+
+
+
+.pull-left[
+
+
+```{r}
 
 ## Cell size and temp opt
 
-model6 <- gls(d1_up ~ log(tmp.op), correlation = corBrownian(phy = tree.tmp, form = ~species), data = tmp.dat, method = "ML")
+tmp.dat <- tmp.dat[tmp.dat$d1_up < 2, ]
+
+#model6 <- gls(d1_up ~ log10(tmp.op), correlation = corBrownian(phy = tree.tmp, form = ~species), data = tmp.dat, method = "ML")
+
+model6 <- lm(d1_up ~ log10(tmp.op), data = tmp.dat)
 
 
 ## IC
@@ -917,50 +711,56 @@ model6 <- gls(d1_up ~ log(tmp.op), correlation = corBrownian(phy = tree.tmp, for
 SSX <- sum(round((tmp.dat$tmp.op - mean(tmp.dat$tmp.op))^2), 2)
 s2 <- var(tmp.dat$d1_up)
 n <- length(tmp.dat$d1_up)
-x <- seq(min(log(tmp.dat$tmp.op)), max(log(tmp.dat$tmp.op)), length = 30)
+x <- seq(min(log10(tmp.dat$tmp.op)), max(log10(tmp.dat$tmp.op)), length = 30)
 m.x <- mean(round(log(tmp.dat$tmp.op), 1))
 se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
 is <- qt(0.975, df = n - 2)
 ii <- qt(0.025, df = n - 2)
 ic.s <- se*is
 ic.i <- se*ii
-upper.i <- (log10(coef(model6)[1]) + log10(abs(coef(model6)[2]))*x) + ic.s
-lower.i <- (log10(coef(model6)[1]) + log10(abs(coef(model6)[2]))*x) + ic.i
+upper.i <- (coef(model6)[1] + coef(model6)[2]*x) + ic.s
+lower.i <- (coef(model6)[1] + coef(model6)[2]*x) + ic.i
 
 
-plot(d1_up ~ log(tmp.op), data = tmp.dat, ylab = expression(paste("Cell diameter")~mu*m~(log[10])), xlab = "Optimum temperature \u00B0C (log)", las = 1, pch = 21, cex = 1.2, type = "n")
+plot(d1_up ~ log10(tmp.op), data = tmp.dat, ylab = expression(paste("Cell diameter ", log[10], sep = " ")(mu*m)), xlab = expression(paste("Optimum temperature \u00B0C")~(log[10])), las = 1, pch = 21, cex = 1.2, type = "n")
 
 grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
 
 par(new = TRUE)
 
-cols <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(tmp.dat$kingdom))]
+cols <- setNames(c("purple", "orange"), levels(as.factor(tmp.dat$kingdom)))
 
-plot(d1_up ~ log(tmp.op), data = tmp.dat, xlab = "", ylab = "", las = 1, pch = 21, col = cols, bg = cols, cex = 0.8, axes = FALSE)
+plot(d1_up ~ log10(tmp.op), data = tmp.dat, xlab = "", ylab = "", las = 1, pch = 21, col = cols[tmp.dat$kingdom], bg = cols[tmp.dat$kingdom], cex = 0.8, axes = FALSE)
 
-lines(x = x, y = (log10(coef(model6)[1]) + log10(abs(coef(model6)[2]))*x), lwd = 2, col = "black")
-polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
+lines(x = x, y = (coef(model6)[1] + coef(model6)[2]*x), lwd = 2, col = "black")
+#polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
 
-legend("topleft", legend = levels(as.factor((tmp.dat$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+legend("topleft", legend = levels(as.factor((tmp.dat$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n")
 
 
 ```
 
+]
 
-```{r, include = FALSE}
+--
+
+.pull-right[
+
+```{r}
 
 
 ## Doubling and temp
 
-model7 <- gls(log(doubling_h) ~ log(tmp.op), correlation = corBrownian(phy = tree.tmp2, form = ~species), data = tmp.dat2, method = "ML")
+#model7 <- gls(log(doubling_h) ~ log(tmp.op), correlation = corBrownian(phy = tree.tmp2, form = ~species), data = tmp.dat2, method = "ML")
 
+model7 <- lm(log10(doubling_h) ~ log10(tmp.op), data = tmp.dat2)
 
 ## IC
 
 SSX <- sum(round((tmp.dat2$tmp.op - mean(tmp.dat2$tmp.op))^2), 2)
 s2 <- var(log(tmp.dat2$doubling_h))
 n <- length(tmp.dat2$doubling_h)
-x <- seq(min(log(tmp.dat2$tmp.op)), max(log(tmp.dat2$tmp.op)), length = 30)
+x <- seq(min(log10(tmp.dat2$tmp.op)), max(log10(tmp.dat2$tmp.op)), length = 30)
 m.x <- mean(round(log(tmp.dat2$tmp.op), 1))
 se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
 is <- qt(0.975, df = n - 2)
@@ -971,68 +771,20 @@ upper.i <- (coef(model7)[1] + coef(model7)[2]*x) + ic.s
 lower.i <- (coef(model7)[1] + coef(model7)[2]*x) + ic.i
 
 
-plot(log(doubling_h) ~ log(tmp.op), data = tmp.dat2, ylab = "Doubling h (log)", xlab = "Optimum temperature \u00B0C (log)", las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n")
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.dat2, ylab = expression(paste("Doubling ", log[10], sep = " ")(h)), xlab = expression(paste("Optimum temperature \u00B0C ")~(log[10])), las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n")
 
 grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
 
 par(new = TRUE)
 
-cols3 <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(tmp.dat2$kingdom))]
+cols3 <- c("purple", "orange")[as.numeric(as.factor(tmp.dat2$kingdom))]
 
-plot(log(doubling_h) ~ log(tmp.op), data = tmp.dat2, xlab = "", ylab = "", las = 1, pch = 21, col = cols3, bg = cols3, cex = 0.8, axes = FALSE)
-
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.dat2, xlab = "", ylab = "", las = 1, pch = 21, col = cols3, bg = cols3, cex = 0.8, axes = FALSE)
 
 lines(x = x, y = (coef(model7)[1] + coef(model7)[2]*x), lty = 2, lwd = 2, col = "black")
-polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
+#polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
 
-legend("bottomleft", legend = levels(as.factor((tmp.dat2$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
-
-
-
-```
-
-
-.pull-left[
-
-
-```{r}
-
-
-## Plotting interaction
-
-cols <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(tmp.dat$kingdom))]
-
-
-par(mar = c(5, 4, 1.5, 3))
-
-
-plot(d1_up ~ log(tmp.op), data = tmp.dat, ylab = expression(paste("Cell diameter")~mu*m~(log[10])), xlab = "Optimum temperature \u00B0C (log)", las = 1, pch = 21, cex = 1.2, type = "n")
-
-grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
-
-par(new = TRUE)
-
-plot(d1_up ~ log(tmp.op), data = tmp.dat, xlab = "", ylab = "", las = 1, pch = 21, col = cols, bg = cols, cex = 0.8, axes = FALSE)
-
-## IC
-
-SSX <- sum(round((tmp.dat$tmp.op - mean(tmp.dat$tmp.op))^2), 2)
-s2 <- var(tmp.dat$d1_up)
-n <- length(tmp.dat$d1_up)
-x <- seq(min(log(tmp.dat$tmp.op)), max(log(tmp.dat$tmp.op)), length = 30)
-m.x <- mean(round(log(tmp.dat$tmp.op), 1))
-se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
-is <- qt(0.975, df = n - 2)
-ii <- qt(0.025, df = n - 2)
-ic.s <- se*is
-ic.i <- se*ii
-upper.i <- (log10(coef(model6)[1]) + log10(abs(coef(model6)[2]))*x) + ic.s
-lower.i <- (log10(coef(model6)[1]) + log10(abs(coef(model6)[2]))*x) + ic.i
-
-lines(x = x, y = (log10(coef(model6)[1]) + log10(abs(coef(model6)[2]))*x), lwd = 2, col = "black")
-polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
-
-legend("topleft", legend = levels(as.factor((tmp.dat$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
+legend("bottomleft", legend = levels(as.factor((tmp.dat2$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n")
 
 
 
@@ -1040,113 +792,3 @@ legend("topleft", legend = levels(as.factor((tmp.dat$kingdom))), pch = 16, col =
 
 
 ]
-
-
----
-
-
-.pull-left[
-
-
-```{r}
-
-
-## Plotting interaction
-
-cols <- c(alpha("red", 0.3), alpha("purple", 0.5))[as.numeric(as.factor(tmp.dat$kingdom))]
-
-
-par(mar = c(5, 4, 1.5, 3))
-
-
-plot(d1_up ~ log(tmp.op), data = tmp.dat, ylab = expression(paste("Cell diameter")~mu*m~(log[10])), xlab = "Optimum temperature \u00B0C (log)", las = 1, pch = 21, cex = 1.2, type = "n")
-
-grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
-
-par(new = TRUE)
-
-plot(d1_up ~ log(tmp.op), data = tmp.dat, xlab = "", ylab = "", las = 1, pch = 21, col = cols, bg = cols, cex = 0.8, axes = FALSE)
-
-## IC
-
-SSX <- sum(round((tmp.dat$tmp.op - mean(tmp.dat$tmp.op))^2), 2)
-s2 <- var(tmp.dat$d1_up)
-n <- length(tmp.dat$d1_up)
-x <- seq(min(log(tmp.dat$tmp.op)), max(log(tmp.dat$tmp.op)), length = 30)
-m.x <- mean(round(log(tmp.dat$tmp.op), 1))
-se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
-is <- qt(0.975, df = n - 2)
-ii <- qt(0.025, df = n - 2)
-ic.s <- se*is
-ic.i <- se*ii
-upper.i <- (log10(coef(model6)[1]) + log10(abs(coef(model6)[2]))*x) + ic.s
-lower.i <- (log10(coef(model6)[1]) + log10(abs(coef(model6)[2]))*x) + ic.i
-
-lines(x = x, y = (log10(coef(model6)[1]) + log10(abs(coef(model6)[2]))*x), lwd = 2, col = "black")
-polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
-
-legend("topleft", legend = levels(as.factor((tmp.dat$kingdom))), pch = 16, col = c(alpha("red", 0.3), alpha("purple", 0.5)), bg = c(alpha("red", 0.3), alpha("purple", 0.5)), bty = "n")
-
-
-## IC
-
-SSX <- sum(round((tmp.dat2$tmp.op - mean(tmp.dat2$tmp.op))^2), 2)
-s2 <- var(log(tmp.dat2$doubling_h))
-n <- length(tmp.dat2$doubling_h)
-x <- seq(min(log(tmp.dat2$tmp.op)), max(log(tmp.dat2$tmp.op)), length = 30)
-m.x <- mean(round(log(tmp.dat2$tmp.op), 1))
-se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
-is <- qt(0.975, df = n - 2)
-ii <- qt(0.025, df = n - 2)
-ic.s <- se*is
-ic.i <- se*ii
-upper.i <- (coef(model7)[1] + coef(model7)[2]*x) + ic.s
-lower.i <- (coef(model7)[1] + coef(model7)[2]*x) + ic.i
-
-
-lines(x = x, y = (coef(model7)[1] + coef(model7)[2]*x), lty = 2, lwd = 2, col = "black")
-polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.2))
-
-axis(side = 4, at = seq(0, 10, length = 6), las = 1)
-mtext("Doubling h (log)", side = 4, line = 2)
-
-legend(x = 1.48, y = 9.5, legend = "Doubling", lty = 2, lwd = 2, bty = "n")
-
-
-
-```
-
-]
-
-
---
-
-
-.pull-right[
-
-
-<br>
-
-
-```{r, echo = TRUE}
-
-
-model6 <- gls(d1_up ~ log(tmp.op), correlation = corBrownian(phy = tree.tmp, form = ~species), data = tmp.dat, method = "ML")
-
-kable(as.data.frame(summary(model6)$tTable), digits = 3, row.names = TRUE) %>%
-  kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
-
-model7 <- gls(log(doubling_h) ~ log(tmp.op), correlation = corBrownian(phy = tree.tmp2, form = ~species), data = tmp.dat2, method = "ML")
-
-kable(as.data.frame(summary(model7)$tTable), digits = 3, row.names = TRUE) %>%
-  kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "center")
-
-
-```
-
-
-
-]
-
-
-
