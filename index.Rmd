@@ -616,6 +616,7 @@ set.seed(1)
 thermal <- rnorm(100, 50, 10)
 
 plot(density(thermal), type = "l", lwd = 2, las = 1, main = "Thermal performance curve", ylab = "Trait y", xlab = "Temperature", yaxt = "n", xaxt = "n", col = "red")
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
 
 
 ```
@@ -626,6 +627,7 @@ plot(density(thermal), type = "l", lwd = 2, las = 1, main = "Thermal performance
 
 
 plot(density(thermal), type = "l", lwd = 2, las = 1, main = "Thermal performance curve", ylab = "Trait y", xlab = "Temperature", yaxt = "n", xaxt = "n", col = "red")
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
 Arrows(20, 0.01, 20, 0.005, lwd = 2)
 text(20, 0.015, "Lower \n limit")
 
@@ -637,6 +639,7 @@ text(20, 0.015, "Lower \n limit")
 ```{r, out.width = "60%"}
 
 plot(density(thermal), type = "l", lwd = 2, las = 1, main = "Thermal performance curve", ylab = "Trait y", xlab = "Temperature", yaxt = "n", xaxt = "n", col = "red")
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
 Arrows(20, 0.01, 20, 0.005, lwd = 2)
 text(20, 0.015, "Lower \n limit")
 Arrows(80, 0.01, 80, 0.005, lwd = 2)
@@ -651,6 +654,7 @@ text(80, 0.015, "Upper \n limit")
 
 
 plot(density(thermal), type = "l", lwd = 2, las = 1, main = "Thermal performance curve", ylab = "Trait y", xlab = "Temperature", yaxt = "n", xaxt = "n", col = "red")
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
 Arrows(20, 0.01, 20, 0.005, lwd = 2)
 text(20, 0.015, "Lower \n limit")
 Arrows(80, 0.01, 80, 0.005, lwd = 2)
