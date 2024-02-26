@@ -677,66 +677,199 @@ mrg.tmp <- merge(temp.op, growth_temp, by = "species")
 str(mrg.tmp)
 
 
-mrg.tmp <- mrg.tmp[mrg.tmp$growth_tmp == mrg.tmp$tmp.op, ]
+mrg.op.tmp <- mrg.tmp[mrg.tmp$growth_tmp == mrg.tmp$tmp.op, ]
+mrg.upper.tmp <- mrg.tmp[mrg.tmp$growth_tmp > mrg.tmp$tmp.op, ]
+mrg.lower.tmp <- mrg.tmp[mrg.tmp$growth_tmp < mrg.tmp$tmp.op, ]
 
-mrg.tmp.op2 <- merge(mrg.tmp, d1_up, by = "species")
-str(mrg.tmp.op2)
+mrg.tmp.op <- merge(mrg.op.tmp, d1_up, by = "species")
+str(mrg.tmp.op)
 
+mrg.tmp.upper <- merge(mrg.upper.tmp, d1_up, by = "species")
+str(mrg.tmp.upper)
 
-mrg.tmp.op3 <- merge(mrg.tmp.op2, doubling, by = "species")
-str(mrg.tmp.op3)
+mrg.tmp.lower <- merge(mrg.lower.tmp, d1_up, by = "species")
+str(mrg.tmp.lower)
+
+mrg.tmp.op.growth <- merge(mrg.tmp.op, doubling, by = "species")
+str(mrg.tmp.op.growth)
+
+mrg.tmp.upper.growth <- merge(mrg.tmp.upper, doubling, by = "species")
+str(mrg.tmp.upper.growth)
+
+mrg.tmp.lower.growth <- merge(mrg.tmp.lower, doubling, by = "species")
+str(mrg.tmp.lower.growth)
 
 
 obj <- rep()
-for(i in mrg.tmp.op2$species){
+for(i in mrg.tmp.op$species){
     kingdom <- unique(data$superkingdom[data$species == i])
     obj <- c(obj, kingdom)
 }
 
-mrg.tmp.op2$kingdom <- obj
-head(mrg.tmp.op2)
+mrg.tmp.op$kingdom <- obj
+head(mrg.tmp.op)
 
-mrg.tmp.op2$species <- gsub("[[:punct:]]", "", mrg.tmp.op2$species)
-mrg.tmp.op2$species <- gsub(" ", "_", mrg.tmp.op2$species)
-rownames(mrg.tmp.op2) <- mrg.tmp.op2$species
-head(mrg.tmp.op2$species)
+mrg.tmp.op$species <- gsub("[[:punct:]]", "", mrg.tmp.op$species)
+mrg.tmp.op$species <- gsub(" ", "_", mrg.tmp.op$species)
+rownames(mrg.tmp.op) <- mrg.tmp.op$species
+head(mrg.tmp.op$species)
 
-check <- name.check(tree, mrg.tmp.op2)
+check <- name.check(tree, mrg.tmp.op)
 rm_phy <- check$tree_not_data
 rm_dat <- check$data_not_tree
-tree.tmp <- drop.tip(tree, rm_phy)
+tree.tmp.op <- drop.tip(tree, rm_phy)
 
-tmp.dat <- subset(mrg.tmp.op2, subset = mrg.tmp.op2$species %in% tree.tmp$tip, select = names(mrg.tmp.op2))
-name.check(tree.tmp, tmp.dat)
+tmp.op.dat <- subset(mrg.tmp.op, subset = mrg.tmp.op$species %in% tree.tmp.op$tip, select = names(mrg.tmp.op))
+name.check(tree.tmp.op, tmp.op.dat)
+
+
+
+
+
 
 obj <- rep()
-for(i in mrg.tmp.op3$species){
+for(i in mrg.tmp.upper$species){
     kingdom <- unique(data$superkingdom[data$species == i])
     obj <- c(obj, kingdom)
 }
 
-mrg.tmp.op3$kingdom <- obj
-head(mrg.tmp.op3)
+mrg.tmp.upper$kingdom <- obj
+head(mrg.tmp.upper)
 
-mrg.tmp.op3$species <- gsub("[[:punct:]]", "", mrg.tmp.op3$species)
-mrg.tmp.op3$species <- gsub(" ", "_", mrg.tmp.op3$species)
-rownames(mrg.tmp.op3) <- mrg.tmp.op3$species
-head(mrg.tmp.op3$species)
+mrg.tmp.upper$species <- gsub("[[:punct:]]", "", mrg.tmp.upper$species)
+mrg.tmp.upper$species <- gsub(" ", "_", mrg.tmp.upper$species)
+rownames(mrg.tmp.upper) <- mrg.tmp.upper$species
+head(mrg.tmp.upper$species)
 
-check <- name.check(tree, mrg.tmp.op3)
+check <- name.check(tree, mrg.tmp.upper)
 rm_phy <- check$tree_not_data
 rm_dat <- check$data_not_tree
-tree.tmp2 <- drop.tip(tree, rm_phy)
+tree.tmp.upper <- drop.tip(tree, rm_phy)
 
-tmp.dat2 <- subset(mrg.tmp.op3, subset = mrg.tmp.op3$species %in% tree.tmp2$tip, select = names(mrg.tmp.op3))
-name.check(tree.tmp2, tmp.dat2)
+tmp.upper.dat <- subset(mrg.tmp.upper, subset = mrg.tmp.upper$species %in% tree.tmp.upper$tip, select = names(mrg.tmp.upper))
+name.check(tree.tmp.upper, tmp.upper.dat)
+
+
+
+
+
+
+
+obj <- rep()
+for(i in mrg.tmp.lower$species){
+    kingdom <- unique(data$superkingdom[data$species == i])
+    obj <- c(obj, kingdom)
+}
+
+mrg.tmp.lower$kingdom <- obj
+head(mrg.tmp.lower)
+
+mrg.tmp.lower$species <- gsub("[[:punct:]]", "", mrg.tmp.lower$species)
+mrg.tmp.lower$species <- gsub(" ", "_", mrg.tmp.lower$species)
+rownames(mrg.tmp.lower) <- mrg.tmp.lower$species
+head(mrg.tmp.lower$species)
+
+check <- name.check(tree, mrg.tmp.lower)
+rm_phy <- check$tree_not_data
+rm_dat <- check$data_not_tree
+tree.tmp.lower <- drop.tip(tree, rm_phy)
+
+tmp.lower.dat <- subset(mrg.tmp.lower, subset = mrg.tmp.lower$species %in% tree.tmp.lower$tip, select = names(mrg.tmp.lower))
+name.check(tree.tmp.lower, tmp.lower.dat)
+
+
+
+
+
+## Growth
+
+
+
+
+obj <- rep()
+for(i in mrg.tmp.op.growth$species){
+    kingdom <- unique(data$superkingdom[data$species == i])
+    obj <- c(obj, kingdom)
+}
+
+mrg.tmp.op.growth$kingdom <- obj
+head(mrg.tmp.op.growth)
+
+mrg.tmp.op.growth$species <- gsub("[[:punct:]]", "", mrg.tmp.op.growth$species)
+mrg.tmp.op.growth$species <- gsub(" ", "_", mrg.tmp.op.growth$species)
+rownames(mrg.tmp.op.growth) <- mrg.tmp.op.growth$species
+head(mrg.tmp.op.growth$species)
+
+check <- name.check(tree, mrg.tmp.op.growth)
+rm_phy <- check$tree_not_data
+rm_dat <- check$data_not_tree
+tree.tmp.op.growth <- drop.tip(tree, rm_phy)
+
+tmp.op.dat.growth <- subset(mrg.tmp.op.growth, subset = mrg.tmp.op.growth$species %in% tree.tmp.op.growth$tip, select = names(mrg.tmp.op.growth))
+name.check(tree.tmp.op.growth, tmp.op.dat.growth)
+
+
+
+
+
+
+obj <- rep()
+for(i in mrg.tmp.upper.growth$species){
+    kingdom <- unique(data$superkingdom[data$species == i])
+    obj <- c(obj, kingdom)
+}
+
+mrg.tmp.upper.growth$kingdom <- obj
+head(mrg.tmp.upper.growth)
+
+mrg.tmp.upper.growth$species <- gsub("[[:punct:]]", "", mrg.tmp.upper.growth$species)
+mrg.tmp.upper.growth$species <- gsub(" ", "_", mrg.tmp.upper.growth$species)
+rownames(mrg.tmp.upper.growth) <- mrg.tmp.upper.growth$species
+head(mrg.tmp.upper.growth$species)
+
+check <- name.check(tree, mrg.tmp.upper.growth)
+rm_phy <- check$tree_not_data
+rm_dat <- check$data_not_tree
+tree.tmp.upper.growth <- drop.tip(tree, rm_phy)
+
+tmp.upper.dat.growth <- subset(mrg.tmp.upper.growth, subset = mrg.tmp.upper.growth$species %in% tree.tmp.upper.growth$tip, select = names(mrg.tmp.upper.growth))
+name.check(tree.tmp.upper.growth, tmp.upper.dat.growth)
+
+
+
+
+
+
+
+obj <- rep()
+for(i in mrg.tmp.lower.growth$species){
+    kingdom <- unique(data$superkingdom[data$species == i])
+    obj <- c(obj, kingdom)
+}
+
+mrg.tmp.lower.growth$kingdom <- obj
+head(mrg.tmp.lower.growth)
+
+mrg.tmp.lower.growth$species <- gsub("[[:punct:]]", "", mrg.tmp.lower.growth$species)
+mrg.tmp.lower.growth$species <- gsub(" ", "_", mrg.tmp.lower.growth$species)
+rownames(mrg.tmp.lower.growth) <- mrg.tmp.lower.growth$species
+head(mrg.tmp.lower.growth$species)
+
+check <- name.check(tree, mrg.tmp.lower.growth)
+rm_phy <- check$tree_not_data
+rm_dat <- check$data_not_tree
+tree.tmp.lower.growth <- drop.tip(tree, rm_phy)
+
+tmp.lower.dat.growth <- subset(mrg.tmp.lower.growth, subset = mrg.tmp.lower.growth$species %in% tree.tmp.lower.growth$tip, select = names(mrg.tmp.lower.growth))
+name.check(tree.tmp.lower.growth, tmp.lower.dat.growth)
+
 
 
 
 ```
 
 
-```{r, out.width = "60%", include = FALSE}
+```{r, out.width = "60%", include = FALSE, eval = FALSE}
 
 
 tmp.op <- setNames(log(tmp.dat$tmp.op), rownames(tmp.dat))
@@ -764,27 +897,140 @@ mtext("Time (mya)", side = 1)
 
 
 
-.pull-left[
-
-
 ```{r}
 
-## Cell size and temp opt
 
-tmp.dat <- tmp.dat[tmp.dat$d1_up < 2, ]
+layout(matrix(c(1, 1, 2, 2, 3, 3,
+                1, 1, 2, 2, 3, 3,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0), nrow = 4, ncol = 6, byrow = TRUE))
 
-#model6 <- gls(d1_up ~ log10(tmp.op), correlation = corBrownian(phy = tree.tmp, form = ~species), data = tmp.dat, method = "ML")
 
-model6 <- lm(d1_up ~ log10(tmp.op), data = tmp.dat)
+
+par(mar = c(6.4, 4, 2, 0), cex.main = 0.8, cex.axis = 0.7)
+
+## lower
+
+
+tmp.lower.dat <- tmp.lower.dat[tmp.lower.dat$d1_up < 4, ] ## Removing potential outliers
+
+
+model6.1 <- lm(d1_up ~ log10(tmp.op), data = tmp.lower.dat)
 
 
 ## IC
 
-SSX <- sum(round((log10(tmp.dat$tmp.op) - mean(log10(tmp.dat$tmp.op)))^2), 2)
-s2 <- var(tmp.dat$d1_up)
-n <- length(tmp.dat$d1_up)
-x <- seq(min(log10(tmp.dat$tmp.op)), max(log10(tmp.dat$tmp.op)), length = 30)
-m.x <- mean(round(log10(tmp.dat$tmp.op), 1))
+SSX <- sum(round((log10(tmp.lower.dat$tmp.op) - mean(log10(tmp.lower.dat$tmp.op)))^2), 2)
+s2 <- var(tmp.lower.dat$d1_up)
+n <- length(tmp.lower.dat$d1_up)
+x <- seq(min(log10(tmp.lower.dat$tmp.op)), max(log10(tmp.lower.dat$tmp.op)), length = 30)
+m.x <- mean(round(log10(tmp.lower.dat$tmp.op), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(model6.1)[1] + coef(model6.1)[2]*x) + ic.s
+lower.i <- (coef(model6.1)[1] + coef(model6.1)[2]*x) + ic.i
+
+
+plot(d1_up ~ log10(tmp.op), data = tmp.lower.dat, ylab = expression(paste("Cell diameter ", log[10], sep = " ")(mu*m)), xlab = expression(paste("Lower temperature \u00B0C")~(log[10])), las = 1, pch = 21, cex = 1.2, type = "n", main = "Growth tmp < Optimum tmp")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols <- setNames(c("purple", "orange"), levels(as.factor(tmp.lower.dat$kingdom)))
+
+plot(d1_up ~ log10(tmp.op), data = tmp.lower.dat, xlab = "", ylab = "", las = 1, pch = 21, col = cols[tmp.lower.dat$kingdom], bg = cols[tmp.lower.dat$kingdom], cex = 0.4, axes = FALSE)
+
+#lines(x = x, y = (coef(model6.1)[1] + coef(model6.1)[2]*x), lwd = 2, col = "black")
+#polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
+
+legend("topleft", legend = levels(as.factor((tmp.lower.dat$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n", cex = 0.5)
+
+
+
+```
+
+
+
+---
+
+
+
+
+```{r}
+
+layout(matrix(c(1, 1, 2, 2, 3, 3,
+                1, 1, 2, 2, 3, 3,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0), nrow = 4, ncol = 6, byrow = TRUE))
+
+
+
+par(mar = c(6.4, 4, 2, 0), cex.main = 0.8, cex.axis = 0.7)
+
+## lower
+
+
+tmp.lower.dat <- tmp.lower.dat[tmp.lower.dat$d1_up < 4, ] ## Removing potential outliers
+
+
+model6.1 <- lm(d1_up ~ log10(tmp.op), data = tmp.lower.dat)
+
+
+## IC
+
+SSX <- sum(round((log10(tmp.lower.dat$tmp.op) - mean(log10(tmp.lower.dat$tmp.op)))^2), 2)
+s2 <- var(tmp.lower.dat$d1_up)
+n <- length(tmp.lower.dat$d1_up)
+x <- seq(min(log10(tmp.lower.dat$tmp.op)), max(log10(tmp.lower.dat$tmp.op)), length = 30)
+m.x <- mean(round(log10(tmp.lower.dat$tmp.op), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(model6.1)[1] + coef(model6.1)[2]*x) + ic.s
+lower.i <- (coef(model6.1)[1] + coef(model6.1)[2]*x) + ic.i
+
+
+plot(d1_up ~ log10(tmp.op), data = tmp.lower.dat, ylab = expression(paste("Cell diameter ", log[10], sep = " ")(mu*m)), xlab = expression(paste("Lower temperature \u00B0C")~(log[10])), las = 1, pch = 21, cex = 1.2, type = "n", main = "Growth tmp < Optimum tmp")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols <- setNames(c("purple", "orange"), levels(as.factor(tmp.lower.dat$kingdom)))
+
+plot(d1_up ~ log10(tmp.op), data = tmp.lower.dat, xlab = "", ylab = "", las = 1, pch = 21, col = cols[tmp.lower.dat$kingdom], bg = cols[tmp.lower.dat$kingdom], cex = 0.4, axes = FALSE)
+
+#lines(x = x, y = (coef(model6.1)[1] + coef(model6.1)[2]*x), lwd = 2, col = "black")
+#polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
+
+legend("topleft", legend = levels(as.factor((tmp.lower.dat$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n", cex = 0.5)
+
+
+
+
+## Cell size and temp opt
+
+tmp.op.dat <- tmp.op.dat[tmp.op.dat$d1_up < 4, ] ## Removing potential outliers
+
+#model6 <- gls(d1_up ~ log10(tmp.op), correlation = corBrownian(phy = tree.tmp, form = ~species), data = tmp.dat, method = "ML")
+
+#model6 <- lm(d1_up ~ log10(tmp.op), data = tmp.dat)
+model6 <- lm(d1_up ~ log10(tmp.op), data = tmp.op.dat)
+
+
+## IC
+
+SSX <- sum(round((log10(tmp.op.dat$tmp.op) - mean(log10(tmp.op.dat$tmp.op)))^2), 2)
+s2 <- var(tmp.op.dat$d1_up)
+n <- length(tmp.op.dat$d1_up)
+x <- seq(min(log10(tmp.op.dat$tmp.op)), max(log10(tmp.op.dat$tmp.op)), length = 30)
+m.x <- mean(round(log10(tmp.op.dat$tmp.op), 1))
 se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
 is <- qt(0.975, df = n - 2)
 ii <- qt(0.025, df = n - 2)
@@ -794,46 +1040,305 @@ upper.i <- (coef(model6)[1] + coef(model6)[2]*x) + ic.s
 lower.i <- (coef(model6)[1] + coef(model6)[2]*x) + ic.i
 
 
-plot(d1_up ~ log10(tmp.op), data = tmp.dat, ylab = expression(paste("Cell diameter ", log[10], sep = " ")(mu*m)), xlab = expression(paste("Optimum temperature \u00B0C")~(log[10])), las = 1, pch = 21, cex = 1.2, type = "n")
+par(mar = c(6.4, 2.3, 2, 0), cex.main = 0.8, cex.axis = 0.7)
+
+plot(d1_up ~ log10(tmp.op), data = tmp.op.dat, ylab = " ",  xlab = expression(paste("Optimum temperature \u00B0C")~(log[10])), las = 1, pch = 21, cex = 1.2, type = "n", main = "Optimum tmp")
 
 grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
 
 par(new = TRUE)
 
-cols <- setNames(c("purple", "orange"), levels(as.factor(tmp.dat$kingdom)))
+cols <- setNames(c("purple", "orange"), levels(as.factor(tmp.op.dat$kingdom)))
 
-plot(d1_up ~ log10(tmp.op), data = tmp.dat, xlab = "", ylab = "", las = 1, pch = 21, col = cols[tmp.dat$kingdom], bg = cols[tmp.dat$kingdom], cex = 0.8, axes = FALSE)
+plot(d1_up ~ log10(tmp.op), data = tmp.op.dat, xlab = "", ylab = "", las = 1, pch = 21, col = cols[tmp.op.dat$kingdom], bg = cols[tmp.op.dat$kingdom], cex = 0.4, axes = FALSE)
 
 #lines(x = x, y = (coef(model6)[1] + coef(model6)[2]*x), lwd = 2, col = "black")
 #polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
 
-legend("topleft", legend = levels(as.factor((tmp.dat$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n")
+legend("topleft", legend = levels(as.factor((tmp.op.dat$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n", cex = 0.5)
+
 
 
 ```
 
-]
 
---
 
-.pull-right[
+---
+
+
+
 
 ```{r}
 
 
-## Doubling and temp
+layout(matrix(c(1, 1, 2, 2, 3, 3,
+                1, 1, 2, 2, 3, 3,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0), nrow = 4, ncol = 6, byrow = TRUE))
 
-#model7 <- gls(log(doubling_h) ~ log(tmp.op), correlation = corBrownian(phy = tree.tmp2, form = ~species), data = tmp.dat2, method = "ML")
 
-model7 <- lm(log10(doubling_h) ~ log10(tmp.op), data = tmp.dat2)
+
+par(mar = c(6.4, 4, 2, 0), cex.main = 0.8, cex.axis = 0.7)
+
+## lower
+
+
+tmp.lower.dat <- tmp.lower.dat[tmp.lower.dat$d1_up < 4, ] ## Removing potential outliers
+
+
+model6.1 <- lm(d1_up ~ log10(tmp.op), data = tmp.lower.dat)
+
 
 ## IC
 
-SSX <- sum(round((log10(tmp.dat2$tmp.op) - mean(log10(tmp.dat2$tmp.op)))^2), 2)
-s2 <- var(log10(tmp.dat2$doubling_h))
-n <- length(log10(tmp.dat2$doubling_h))
-x <- seq(min(log10(tmp.dat2$tmp.op)), max(log10(tmp.dat2$tmp.op)), length = 30)
-m.x <- mean(round(log10(tmp.dat2$tmp.op), 1))
+SSX <- sum(round((log10(tmp.lower.dat$tmp.op) - mean(log10(tmp.lower.dat$tmp.op)))^2), 2)
+s2 <- var(tmp.lower.dat$d1_up)
+n <- length(tmp.lower.dat$d1_up)
+x <- seq(min(log10(tmp.lower.dat$tmp.op)), max(log10(tmp.lower.dat$tmp.op)), length = 30)
+m.x <- mean(round(log10(tmp.lower.dat$tmp.op), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(model6.1)[1] + coef(model6.1)[2]*x) + ic.s
+lower.i <- (coef(model6.1)[1] + coef(model6.1)[2]*x) + ic.i
+
+
+plot(d1_up ~ log10(tmp.op), data = tmp.lower.dat, ylab = expression(paste("Cell diameter ", log[10], sep = " ")(mu*m)), xlab = expression(paste("Lower temperature \u00B0C")~(log[10])), las = 1, pch = 21, cex = 1.2, type = "n", main = "Growth tmp < Optimum tmp")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols <- setNames(c("purple", "orange"), levels(as.factor(tmp.lower.dat$kingdom)))
+
+plot(d1_up ~ log10(tmp.op), data = tmp.lower.dat, xlab = "", ylab = "", las = 1, pch = 21, col = cols[tmp.lower.dat$kingdom], bg = cols[tmp.lower.dat$kingdom], cex = 0.4, axes = FALSE)
+
+#lines(x = x, y = (coef(model6.1)[1] + coef(model6.1)[2]*x), lwd = 2, col = "black")
+#polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
+
+legend("topleft", legend = levels(as.factor((tmp.lower.dat$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n", cex = 0.5)
+
+
+
+
+## Cell size and temp opt
+
+tmp.op.dat <- tmp.op.dat[tmp.op.dat$d1_up < 4, ] ## Removing potential outliers
+
+#model6 <- gls(d1_up ~ log10(tmp.op), correlation = corBrownian(phy = tree.tmp, form = ~species), data = tmp.dat, method = "ML")
+
+#model6 <- lm(d1_up ~ log10(tmp.op), data = tmp.dat)
+model6 <- lm(d1_up ~ log10(tmp.op), data = tmp.op.dat)
+
+
+## IC
+
+SSX <- sum(round((log10(tmp.op.dat$tmp.op) - mean(log10(tmp.op.dat$tmp.op)))^2), 2)
+s2 <- var(tmp.op.dat$d1_up)
+n <- length(tmp.op.dat$d1_up)
+x <- seq(min(log10(tmp.op.dat$tmp.op)), max(log10(tmp.op.dat$tmp.op)), length = 30)
+m.x <- mean(round(log10(tmp.op.dat$tmp.op), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(model6)[1] + coef(model6)[2]*x) + ic.s
+lower.i <- (coef(model6)[1] + coef(model6)[2]*x) + ic.i
+
+
+par(mar = c(6.4, 2.3, 2, 0), cex.main = 0.8, cex.axis = 0.7)
+
+plot(d1_up ~ log10(tmp.op), data = tmp.op.dat, ylab = " ",  xlab = expression(paste("Optimum temperature \u00B0C")~(log[10])), las = 1, pch = 21, cex = 1.2, type = "n", main = "Optimum tmp")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols <- setNames(c("purple", "orange"), levels(as.factor(tmp.op.dat$kingdom)))
+
+plot(d1_up ~ log10(tmp.op), data = tmp.op.dat, xlab = "", ylab = "", las = 1, pch = 21, col = cols[tmp.op.dat$kingdom], bg = cols[tmp.op.dat$kingdom], cex = 0.4, axes = FALSE)
+
+#lines(x = x, y = (coef(model6)[1] + coef(model6)[2]*x), lwd = 2, col = "black")
+#polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
+
+legend("topleft", legend = levels(as.factor((tmp.op.dat$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n", cex = 0.5)
+
+
+
+
+
+## upper
+
+
+tmp.upper.dat <- tmp.upper.dat[tmp.upper.dat$d1_up < 4, ] ## Removing potential outliers
+
+
+model6.3 <- lm(d1_up ~ log10(tmp.op), data = tmp.upper.dat)
+
+
+## IC
+
+SSX <- sum(round((log10(tmp.upper.dat$tmp.op) - mean(log10(tmp.upper.dat$tmp.op)))^2), 2)
+s2 <- var(tmp.upper.dat$d1_up)
+n <- length(tmp.upper.dat$d1_up)
+x <- seq(min(log10(tmp.upper.dat$tmp.op)), max(log10(tmp.upper.dat$tmp.op)), length = 30)
+m.x <- mean(round(log10(tmp.upper.dat$tmp.op), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(model6.3)[1] + coef(model6.3)[2]*x) + ic.s
+lower.i <- (coef(model6.3)[1] + coef(model6.3)[2]*x) + ic.i
+
+
+par(mar = c(6.4, 2.3, 2, 0.1), cex.main = 0.8, cex.axis = 0.7)
+
+plot(d1_up ~ log10(tmp.op), data = tmp.upper.dat, ylab = " ", xlab = expression(paste("Upper temperature \u00B0C")~(log[10])), las = 1, pch = 21, cex = 1.2, type = "n", main = "Growth tmp > Optimum tmp")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols <- setNames(c("purple", "orange"), levels(as.factor(tmp.upper.dat$kingdom)))
+
+plot(d1_up ~ log10(tmp.op), data = tmp.upper.dat, xlab = "", ylab = "", las = 1, pch = 21, col = cols[tmp.upper.dat$kingdom], bg = cols[tmp.upper.dat$kingdom], cex = 0.4, axes = FALSE)
+
+lines(x = x, y = (coef(model6.3)[1] + coef(model6.3)[2]*x), lwd = 2, col = "black")
+polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
+
+legend("topleft", legend = levels(as.factor((tmp.upper.dat$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n", cex = 0.5)
+
+
+```
+
+---
+
+
+
+```{r}
+
+
+layout(matrix(c(1, 1, 2, 2, 3, 3,
+                1, 1, 2, 2, 3, 3,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0), nrow = 4, ncol = 6, byrow = TRUE))
+
+
+
+## lower
+
+
+model7.1 <- lm(log10(doubling_h) ~ log10(tmp.op), data = tmp.lower.dat.growth)
+
+## IC
+
+SSX <- sum(round((log10(tmp.lower.dat.growth$tmp.op) - mean(log10(tmp.lower.dat.growth$tmp.op)))^2), 2)
+s2 <- var(log10(tmp.lower.dat.growth$doubling_h))
+n <- length(log10(tmp.lower.dat.growth$doubling_h))
+x <- seq(min(log10(tmp.lower.dat.growth$tmp.op)), max(log10(tmp.lower.dat.growth$tmp.op)), length = 30)
+m.x <- mean(round(log10(tmp.lower.dat.growth$tmp.op), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(model7.1)[1] + coef(model7.1)[2]*x) + ic.s
+lower.i <- (coef(model7.1)[1] + coef(model7.1)[2]*x) + ic.i
+
+par(mar = c(6.4, 4, 2, 0), cex.main = 0.8, cex.axis = 0.7)
+
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.lower.dat.growth, ylab = expression(paste("Doubling ", log[10], sep = " ")(h)), xlab = expression(paste("Lower temperature \u00B0C ")~(log[10])), las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n", main = "Growth tmp < Optimum tmp")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols3 <- c("purple", "orange")[as.numeric(as.factor(tmp.lower.dat.growth$kingdom))]
+
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.lower.dat.growth, xlab = "", ylab = "", las = 1, pch = 21, col = cols3, bg = cols3, cex = 0.4, axes = FALSE)
+
+lines(x = x, y = (coef(model7.1)[1] + coef(model7.1)[2]*x), lty = 2, lwd = 2, col = "black")
+polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
+
+legend("bottomleft", legend = levels(as.factor((tmp.lower.dat.growth$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n", cex = 0.5)
+
+
+
+
+```
+
+
+---
+
+
+```{r}
+
+
+layout(matrix(c(1, 1, 2, 2, 3, 3,
+                1, 1, 2, 2, 3, 3,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0), nrow = 4, ncol = 6, byrow = TRUE))
+
+
+
+## lower
+
+
+model7.1 <- lm(log10(doubling_h) ~ log10(tmp.op), data = tmp.lower.dat.growth)
+
+## IC
+
+SSX <- sum(round((log10(tmp.lower.dat.growth$tmp.op) - mean(log10(tmp.lower.dat.growth$tmp.op)))^2), 2)
+s2 <- var(log10(tmp.lower.dat.growth$doubling_h))
+n <- length(log10(tmp.lower.dat.growth$doubling_h))
+x <- seq(min(log10(tmp.lower.dat.growth$tmp.op)), max(log10(tmp.lower.dat.growth$tmp.op)), length = 30)
+m.x <- mean(round(log10(tmp.lower.dat.growth$tmp.op), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(model7.1)[1] + coef(model7.1)[2]*x) + ic.s
+lower.i <- (coef(model7.1)[1] + coef(model7.1)[2]*x) + ic.i
+
+par(mar = c(6.4, 4, 2, 0), cex.main = 0.8, cex.axis = 0.7)
+
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.lower.dat.growth, ylab = expression(paste("Doubling ", log[10], sep = " ")(h)), xlab = expression(paste("Lower temperature \u00B0C ")~(log[10])), las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n", main = "Growth tmp < Optimum tmp")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols3 <- c("purple", "orange")[as.numeric(as.factor(tmp.lower.dat.growth$kingdom))]
+
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.lower.dat.growth, xlab = "", ylab = "", las = 1, pch = 21, col = cols3, bg = cols3, cex = 0.4, axes = FALSE)
+
+lines(x = x, y = (coef(model7.1)[1] + coef(model7.1)[2]*x), lty = 2, lwd = 2, col = "black")
+polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
+
+legend("bottomleft", legend = levels(as.factor((tmp.lower.dat.growth$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n", cex = 0.5)
+
+
+
+
+
+## Doubling and optimum temp
+
+#model7 <- gls(log(doubling_h) ~ log(tmp.op), correlation = corBrownian(phy = tree.tmp2, form = ~species), data = tmp.dat2, method = "ML")
+
+model7 <- lm(log10(doubling_h) ~ log10(tmp.op), data = tmp.op.dat.growth)
+
+## IC
+
+SSX <- sum(round((log10(tmp.op.dat.growth$tmp.op) - mean(log10(tmp.op.dat.growth$tmp.op)))^2), 2)
+s2 <- var(log10(tmp.op.dat.growth$doubling_h))
+n <- length(log10(tmp.op.dat.growth$doubling_h))
+x <- seq(min(log10(tmp.op.dat.growth$tmp.op)), max(log10(tmp.op.dat.growth$tmp.op)), length = 30)
+m.x <- mean(round(log10(tmp.op.dat.growth$tmp.op), 1))
 se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
 is <- qt(0.975, df = n - 2)
 ii <- qt(0.025, df = n - 2)
@@ -843,24 +1348,160 @@ upper.i <- (coef(model7)[1] + coef(model7)[2]*x) + ic.s
 lower.i <- (coef(model7)[1] + coef(model7)[2]*x) + ic.i
 
 
-plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.dat2, ylab = expression(paste("Doubling ", log[10], sep = " ")(h)), xlab = expression(paste("Optimum temperature \u00B0C ")~(log[10])), las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n")
+par(mar = c(6.4, 2.3, 2, 0.1), cex.main = 0.8, cex.axis = 0.7)
+
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.op.dat.growth, ylab = expression(paste("Doubling ", log[10], sep = " ")(h)), xlab = expression(paste("Optimum temperature \u00B0C ")~(log[10])), las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n", main = "Optimum tmp")
 
 grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
 
 par(new = TRUE)
 
-cols3 <- c("purple", "orange")[as.numeric(as.factor(tmp.dat2$kingdom))]
+cols3 <- c("purple", "orange")[as.numeric(as.factor(tmp.op.dat.growth$kingdom))]
 
-plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.dat2, xlab = "", ylab = "", las = 1, pch = 21, col = cols3, bg = cols3, cex = 0.8, axes = FALSE)
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.op.dat.growth, xlab = "", ylab = "", las = 1, pch = 21, col = cols3, bg = cols3, cex = 0.4, axes = FALSE)
 
 lines(x = x, y = (coef(model7)[1] + coef(model7)[2]*x), lty = 2, lwd = 2, col = "black")
 polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
 
-legend("bottomleft", legend = levels(as.factor((tmp.dat2$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n")
-
+legend("bottomleft", legend = levels(as.factor((tmp.op.dat.growth$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n", cex = 0.5)
 
 
 ```
 
 
-]
+---
+
+
+```{r}
+
+
+layout(matrix(c(1, 1, 2, 2, 3, 3,
+                1, 1, 2, 2, 3, 3,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0), nrow = 4, ncol = 6, byrow = TRUE))
+
+
+
+## lower
+
+
+model7.1 <- lm(log10(doubling_h) ~ log10(tmp.op), data = tmp.lower.dat.growth)
+
+## IC
+
+SSX <- sum(round((log10(tmp.lower.dat.growth$tmp.op) - mean(log10(tmp.lower.dat.growth$tmp.op)))^2), 2)
+s2 <- var(log10(tmp.lower.dat.growth$doubling_h))
+n <- length(log10(tmp.lower.dat.growth$doubling_h))
+x <- seq(min(log10(tmp.lower.dat.growth$tmp.op)), max(log10(tmp.lower.dat.growth$tmp.op)), length = 30)
+m.x <- mean(round(log10(tmp.lower.dat.growth$tmp.op), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(model7.1)[1] + coef(model7.1)[2]*x) + ic.s
+lower.i <- (coef(model7.1)[1] + coef(model7.1)[2]*x) + ic.i
+
+par(mar = c(6.4, 4, 2, 0), cex.main = 0.8, cex.axis = 0.7)
+
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.lower.dat.growth, ylab = expression(paste("Doubling ", log[10], sep = " ")(h)), xlab = expression(paste("Lower temperature \u00B0C ")~(log[10])), las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n", main = "Growth tmp < Optimum tmp")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols3 <- c("purple", "orange")[as.numeric(as.factor(tmp.lower.dat.growth$kingdom))]
+
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.lower.dat.growth, xlab = "", ylab = "", las = 1, pch = 21, col = cols3, bg = cols3, cex = 0.4, axes = FALSE)
+
+lines(x = x, y = (coef(model7.1)[1] + coef(model7.1)[2]*x), lty = 2, lwd = 2, col = "black")
+polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
+
+legend("bottomleft", legend = levels(as.factor((tmp.lower.dat.growth$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n", cex = 0.5)
+
+
+
+
+
+## Doubling and optimum temp
+
+#model7 <- gls(log(doubling_h) ~ log(tmp.op), correlation = corBrownian(phy = tree.tmp2, form = ~species), data = tmp.dat2, method = "ML")
+
+model7 <- lm(log10(doubling_h) ~ log10(tmp.op), data = tmp.op.dat.growth)
+
+## IC
+
+SSX <- sum(round((log10(tmp.op.dat.growth$tmp.op) - mean(log10(tmp.op.dat.growth$tmp.op)))^2), 2)
+s2 <- var(log10(tmp.op.dat.growth$doubling_h))
+n <- length(log10(tmp.op.dat.growth$doubling_h))
+x <- seq(min(log10(tmp.op.dat.growth$tmp.op)), max(log10(tmp.op.dat.growth$tmp.op)), length = 30)
+m.x <- mean(round(log10(tmp.op.dat.growth$tmp.op), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(model7)[1] + coef(model7)[2]*x) + ic.s
+lower.i <- (coef(model7)[1] + coef(model7)[2]*x) + ic.i
+
+
+par(mar = c(6.4, 2.3, 2, 0.1), cex.main = 0.8, cex.axis = 0.7)
+
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.op.dat.growth, ylab = expression(paste("Doubling ", log[10], sep = " ")(h)), xlab = expression(paste("Optimum temperature \u00B0C ")~(log[10])), las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n", main = "Optimum tmp")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols3 <- c("purple", "orange")[as.numeric(as.factor(tmp.op.dat.growth$kingdom))]
+
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.op.dat.growth, xlab = "", ylab = "", las = 1, pch = 21, col = cols3, bg = cols3, cex = 0.4, axes = FALSE)
+
+lines(x = x, y = (coef(model7)[1] + coef(model7)[2]*x), lty = 2, lwd = 2, col = "black")
+polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
+
+legend("bottomleft", legend = levels(as.factor((tmp.op.dat.growth$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n", cex = 0.5)
+
+
+
+## upper
+
+
+model7.2 <- lm(log10(doubling_h) ~ log10(tmp.op), data = tmp.upper.dat.growth)
+
+## IC
+
+SSX <- sum(round((log10(tmp.upper.dat.growth$tmp.op) - mean(log10(tmp.upper.dat.growth$tmp.op)))^2), 2)
+s2 <- var(log10(tmp.upper.dat.growth$doubling_h))
+n <- length(log10(tmp.upper.dat.growth$doubling_h))
+x <- seq(min(log10(tmp.upper.dat.growth$tmp.op)), max(log10(tmp.upper.dat.growth$tmp.op)), length = 30)
+m.x <- mean(round(log10(tmp.upper.dat.growth$tmp.op), 1))
+se <- sqrt(s2*((1/n) + (((x - m.x)^2)/SSX)))
+is <- qt(0.975, df = n - 2)
+ii <- qt(0.025, df = n - 2)
+ic.s <- se*is
+ic.i <- se*ii
+upper.i <- (coef(model7.2)[1] + coef(model7.2)[2]*x) + ic.s
+lower.i <- (coef(model7.2)[1] + coef(model7.2)[2]*x) + ic.i
+
+par(mar = c(6.4, 2.3, 2, 0.1), cex.main = 0.8, cex.axis = 0.7)
+
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.upper.dat.growth, ylab = expression(paste("Doubling ", log[10], sep = " ")(h)), xlab = expression(paste("Upper temperature \u00B0C ")~(log[10])), las = 1, pch = 21, bg = alpha("black", 0.3), cex = 1.2, type = "n", main = "Growth tmp > Optimum tmp")
+
+grid(nx = NULL, ny = NULL, col = alpha("lightgray", 0.5), lwd = 1, lty = 2)
+
+par(new = TRUE)
+
+cols3 <- c("purple", "orange")[as.numeric(as.factor(tmp.upper.dat.growth$kingdom))]
+
+plot(log10(doubling_h) ~ log10(tmp.op), data = tmp.upper.dat.growth, xlab = "", ylab = "", las = 1, pch = 21, col = cols3, bg = cols3, cex = 0.4, axes = FALSE)
+
+lines(x = x, y = (coef(model7.2)[1] + coef(model7.2)[2]*x), lty = 2, lwd = 2, col = "black")
+polygon(c(rev(x), x), c(rev(lower.i), upper.i), border = FALSE, col = alpha("gold", 0.3))
+
+legend("bottomleft", legend = levels(as.factor((tmp.upper.dat.growth$kingdom))), pch = 16, col = c("purple", "orange"), bg = c("purple", "orange"), bty = "n", cex = 0.5)
+
+
+```
+
+
