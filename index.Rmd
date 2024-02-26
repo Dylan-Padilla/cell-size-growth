@@ -607,6 +607,60 @@ How does temperature scale with size and growth?
  </center>
 
 
+---
+
+
+```{r, out.width = "60%"}
+
+set.seed(1)
+thermal <- rnorm(100, 50, 10)
+
+plot(density(thermal), type = "l", lwd = 2, las = 1, main = "Thermal performance curve", ylab = "Trait y", xlab = "Temperature", yaxt = "n", xaxt = "n", col = "red")
+
+
+```
+
+---
+
+```{r, out.width = "60%"}
+
+
+plot(density(thermal), type = "l", lwd = 2, las = 1, main = "Thermal performance curve", ylab = "Trait y", xlab = "Temperature", yaxt = "n", xaxt = "n", col = "red")
+Arrows(20, 0.01, 20, 0.005, lwd = 2)
+text(20, 0.015, "Lower \n limit")
+
+
+```
+
+---
+
+```{r, out.width = "60%"}
+
+plot(density(thermal), type = "l", lwd = 2, las = 1, main = "Thermal performance curve", ylab = "Trait y", xlab = "Temperature", yaxt = "n", xaxt = "n", col = "red")
+Arrows(20, 0.01, 20, 0.005, lwd = 2)
+text(20, 0.015, "Lower \n limit")
+Arrows(80, 0.01, 80, 0.005, lwd = 2)
+text(80, 0.015, "Upper \n limit")
+
+```
+
+---
+
+
+```{r, out.width = "60%"}
+
+
+plot(density(thermal), type = "l", lwd = 2, las = 1, main = "Thermal performance curve", ylab = "Trait y", xlab = "Temperature", yaxt = "n", xaxt = "n", col = "red")
+Arrows(20, 0.01, 20, 0.005, lwd = 2)
+text(20, 0.015, "Lower \n limit")
+Arrows(80, 0.01, 80, 0.005, lwd = 2)
+text(80, 0.015, "Upper \n limit")
+Arrows(75, 0.041, 62, 0.041, lwd = 2)
+text(65, 0.038, "Optimum")
+
+
+```
+
 
 ---
 
@@ -642,10 +696,6 @@ legend(x = 0.2, y = 2.3, legend = paste("=", round((cor(log(di.vol$volume), di.v
 
 
 ```
-
-
----
-
 
 
 ```{r, include = FALSE}
@@ -895,6 +945,8 @@ mtext("Time (mya)", side = 1)
 
 ```
 
+
+---
 
 
 ```{r}
